@@ -1017,7 +1017,9 @@ button {
 }
 
 .payment-field input,
-.payment-field select {
+.payment-field select,
+.payment-document-row input,
+.payment-document-row select {
   width: 100%;
   min-height: 46px;
   border: 1px solid var(--calc-line);
@@ -1029,14 +1031,27 @@ button {
   font-size: 0.86rem;
 }
 
+.payment-document-row {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  gap: 8px;
+}
+
 .payment-field input:focus,
-.payment-field select:focus {
+.payment-field select:focus,
+.payment-document-row input:focus,
+.payment-document-row select:focus {
   border-color: var(--calc-blue);
   box-shadow: 0 0 0 3px rgb(77 115 255 / 15%);
 }
 
 .payment-field select option {
   color: #111827;
+}
+
+.payment-document-row select {
+  padding: 0 9px;
+  font-weight: 800;
 }
 
 .payment-error {
