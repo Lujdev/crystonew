@@ -6,8 +6,8 @@ import {
   Database,
   ShieldCheck,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import { CalculatorCard } from "../components/calculator-card";
 import { Header } from "../components/header";
 
 const rates = [
@@ -40,11 +40,11 @@ export default function HomePage() {
               productos pueden entender.
             </p>
             <div className="hero-actions">
-              <Link className="button button-primary" href="/app">
-                Abrir calculadora <ArrowUpRight size={16} />
-              </Link>
-              <Link className="button button-ghost" href="/docs">
+              <Link className="button button-primary" href="/docs">
                 Explorar la API <ArrowRight size={16} />
+              </Link>
+              <Link className="button button-ghost" href="/historico">
+                Ver histórico <ArrowUpRight size={16} />
               </Link>
             </div>
             <div className="trust-row">
@@ -55,44 +55,8 @@ export default function HomePage() {
               <span>Sin SDK obligatorio</span>
             </div>
           </div>
-
           <div className="hero-stage">
-            <div className="hero-orbit" />
-            <div className="hero-logo-card">
-              <Image
-                src="/logo.png"
-                alt="CrystoDolar"
-                width={126}
-                height={126}
-              />
-            </div>
-            <div className="hero-terminal">
-              <div className="terminal-top">
-                <span>CrystoDolar · live</span>
-                <span className="terminal-dots" aria-hidden="true">
-                  <i /> <i /> <i />
-                </span>
-              </div>
-              <div className="terminal-body">
-                <div className="terminal-label">USD/VES · BCV</div>
-                <div className="terminal-value">Bs. 744,23</div>
-                <svg
-                  className="sparkline"
-                  viewBox="0 0 390 82"
-                  role="img"
-                  aria-label="Tendencia estable"
-                >
-                  <line x1="0" x2="390" y1="18" y2="18" />
-                  <line x1="0" x2="390" y1="42" y2="42" />
-                  <line x1="0" x2="390" y1="66" y2="66" />
-                  <path d="M4 59 C28 58, 40 46, 62 50 S101 42, 124 47 S166 21, 187 30 S220 20, 244 28 S276 45, 298 33 S336 37, 352 21 S375 15, 386 8" />
-                </svg>
-                <div className="terminal-footer">
-                  <span>Última lectura · hace 2 min</span>
-                  <strong>+0,42%</strong>
-                </div>
-              </div>
-            </div>
+            <CalculatorCard compact />
           </div>
         </section>
 
@@ -180,8 +144,8 @@ export default function HomePage() {
                   La tasa que necesitas, donde la necesitas.
                 </h2>
                 <p>
-                  Usa la app para convertir hoy o conecta tu producto a una API
-                  lista para crecer con nuevas monedas y fuentes.
+                  Usa la calculadora desde el inicio o conecta tu producto a una
+                  API lista para crecer con nuevas monedas y fuentes.
                 </p>
               </div>
               <div className="hero-actions">
