@@ -66,7 +66,9 @@ export class QuoteHistory {
   @Column("integer") scale!: number;
   @Column({ default: "verified" }) status!: string;
   @Column() sync_run_id!: number;
-  @CreateDateColumn() @Index() recorded_at!: Date;
+  @Column({ type: "datetime", default: () => "CURRENT_TIMESTAMP" })
+  @Index()
+  recorded_at!: Date;
 }
 
 @Entity("sync_runs")

@@ -720,6 +720,32 @@ button {
   font-style: normal;
 }
 
+.primary-result-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.payment-trigger {
+  display: inline-flex;
+  min-height: 29px;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid rgb(127 160 255 / 45%);
+  border-radius: 9px;
+  padding: 0 8px;
+  background: rgb(77 115 255 / 16%);
+  color: #b7c7ff;
+  font-size: 0.62rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.payment-trigger:hover {
+  border-color: #8aa6ff;
+  background: rgb(77 115 255 / 26%);
+}
+
 .primary-result-values {
   align-items: end;
   margin-top: 13px;
@@ -864,6 +890,192 @@ button {
   margin-top: 3px;
   color: #8fa1bc;
   font-size: 0.58rem;
+}
+
+.payment-overlay {
+  position: fixed;
+  z-index: 100;
+  display: grid;
+  inset: 0;
+  overflow: auto;
+  place-items: center;
+  padding: 18px;
+  background: rgb(3 8 20 / 76%);
+  backdrop-filter: blur(12px);
+}
+
+.payment-modal {
+  width: min(100%, 520px);
+  max-height: calc(100vh - 36px);
+  overflow: auto;
+  border: 1px solid var(--calc-line);
+  border-radius: 22px;
+  background: var(--calc-bg);
+  box-shadow: 0 30px 100px rgb(0 0 0 / 46%);
+}
+
+.payment-modal-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 24px 24px 18px;
+  background: linear-gradient(120deg, #263e98, #4432c9);
+  color: #ffffff;
+}
+
+.payment-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #b9c9ff;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.payment-modal-head h2 {
+  margin: 11px 0 0;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  letter-spacing: -0.07em;
+}
+
+.payment-modal-head p {
+  max-width: 380px;
+  margin: 8px 0 0;
+  color: rgb(255 255 255 / 72%);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.modal-close {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgb(255 255 255 / 24%);
+  border-radius: 11px;
+  background: rgb(255 255 255 / 12%);
+  color: #ffffff;
+}
+
+.payment-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 18px 22px 0;
+}
+
+.payment-summary > div {
+  border: 1px solid var(--calc-line);
+  border-radius: 14px;
+  padding: 13px;
+  background: var(--calc-surface);
+}
+
+.payment-summary span,
+.payment-summary strong {
+  display: block;
+}
+
+.payment-summary span {
+  color: #8fa1bc;
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.payment-summary strong {
+  margin-top: 7px;
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  letter-spacing: -0.05em;
+}
+
+.payment-form,
+.payment-success {
+  padding: 18px 22px 22px;
+}
+
+.payment-field {
+  display: grid;
+  gap: 7px;
+  margin-top: 13px;
+}
+
+.payment-field span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #aebdd3;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.payment-field input,
+.payment-field select {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid var(--calc-line);
+  border-radius: 12px;
+  outline: none;
+  padding: 0 13px;
+  background: var(--calc-surface);
+  color: #ffffff;
+  font-size: 0.86rem;
+}
+
+.payment-field input:focus,
+.payment-field select:focus {
+  border-color: var(--calc-blue);
+  box-shadow: 0 0 0 3px rgb(77 115 255 / 15%);
+}
+
+.payment-field select option {
+  color: #111827;
+}
+
+.payment-error {
+  margin: 13px 0 0;
+  color: #ff8d88;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.payment-note {
+  display: flex;
+  align-items: start;
+  gap: 7px;
+  margin: 15px 0 0;
+  color: #8192ad;
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+.payment-success {
+  color: #ffffff;
+  text-align: center;
+}
+
+.payment-success.payment-success > svg {
+  color: var(--calc-green);
+}
+
+.payment-success h3 {
+  margin: 10px 0 0;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+}
+
+.payment-success p {
+  margin: 8px 0 0;
+  color: #9aa9c0;
+  font-size: 0.82rem;
+  line-height: 1.55;
 }
 
 .quote-delta.gain {
@@ -1866,15 +2078,53 @@ button {
 
 .chart-line {
   fill: none;
-  stroke: var(--brand);
+  stroke: var(--calc-blue);
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 4;
 }
 
+.chart-buy-line {
+  stroke: var(--calc-blue);
+}
+
+.chart-sell-line {
+  stroke: var(--calc-orange);
+  stroke-dasharray: 8 5;
+}
+
 .chart-area {
   fill: url(#chartGradient);
   opacity: 0.42;
+}
+
+.history-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.history-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.history-legend i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.legend-buy {
+  background: var(--calc-blue);
+}
+
+.legend-sell {
+  background: var(--calc-orange);
 }
 
 .history-table-wrap {
@@ -1907,6 +2157,26 @@ button {
   font-family: var(--font-display);
   font-size: 1.03rem;
   letter-spacing: -0.05em;
+}
+
+.history-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.history-provider-name {
+  display: block;
+  margin-top: 3px;
+  color: var(--subtle);
+  font-size: 0.7rem;
+}
+
+.history-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--lime);
 }
 
 .empty-state {

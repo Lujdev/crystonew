@@ -10,9 +10,11 @@ import {
   DollarSign,
   Euro,
   Landmark,
+  Smartphone,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { MobilePaymentModal } from "./mobile-payment-modal";
 
 type Currency = "USD" | "EUR" | "USDT";
 type Rate = {
@@ -48,6 +50,7 @@ export function CalculatorCard({ compact = false }: { compact?: boolean }) {
   const [currency, setCurrency] = useState<Currency>("USD");
   const [amount, setAmount] = useState("100");
   const [loading, setLoading] = useState(false);
+  const [paymentOpen, setPaymentOpen] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -93,7 +96,7 @@ export function CalculatorCard({ compact = false }: { compact?: boolean }) {
           <strong>{currency}</strong>
         </div>
         <div className="calculator-primary-result">
-          <div className="primary-result-head"><span><SelectedIcon size={14} /> {currency} · {currencyMeta[currency].provider}</span><small>Tasa base</small></div>
+          <div className="primary-result-head"><span><SelectedIcon size={14} /> {currency} · {currencyMeta[currency].provider}</span><div className="primary-result-actions"><small>Tasa base</small><button className="payment-trigger" type="button" onClick={() => setPaymentOpen(true)}><Smartphone size={13} /> Pago Móvil</button></div></div>
           <div className="primary-result-values">
             <div><small>Tasa</small><strong>Bs. {money(selectedRate.buy)}</strong><em>/ {currency}</em></div>
             <div className="primary-result-total"><small>Recibes en VES · {amount || "0"} {currency}</small><strong>Bs. {money(numericAmount * selectedRate.buy)}</strong></div>
@@ -127,6 +130,7 @@ export function CalculatorCard({ compact = false }: { compact?: boolean }) {
         </div>
         <div className="calculator-foot"><span><CheckCircle2 size={14} /> Tasas referenciales</span><span><Clock3 size={14} /> {loading ? "Actualizando" : `Actualizado ${updatedAt}`}</span></div>
       </div>
+      <MobilePaymentModal open={paymentOpen} onClose={() => setPaymentOpen(false)} currency={currency} amount={amount} vesTotal={numericAmount * selectedRate.buy} />
     </section>
   );
 }

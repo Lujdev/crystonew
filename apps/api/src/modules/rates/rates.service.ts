@@ -34,6 +34,7 @@ export class RatesService {
       }),
     );
     let quoteCount = 0;
+    const seenQuotes = new Set<string>();
     try {
       for (const provider of providers) {
         const quotes = await provider.collect();
@@ -43,6 +44,9 @@ export class RatesService {
             code: quote.providerCode,
           });
           if (!pair || !source) continue;
+          const quoteKey = `${source.id}:${pair.id}`;
+          if (seenQuotes.has(quoteKey)) continue;
+          seenQuotes.add(quoteKey);
           const current = await this.currentRepo.findOneBy({
             provider_id: source.id,
             pair_id: pair.id,
@@ -60,17 +64,32 @@ export class RatesService {
           entity.status = quote.status;
           entity.observed_at = quote.observedAt;
           await this.currentRepo.save(entity);
-          await this.historyRepo.save(
-            this.historyRepo.create({
-              provider_id: source.id,
-              pair_id: pair.id,
-              buy_scaled: entity.buy_scaled,
-              sell_scaled: entity.sell_scaled,
-              scale: SCALE,
-              status: quote.status,
-              sync_run_id: run.id,
-            }),
-          );
+          const latestHistory = await this.historyRepo.findOne({
+            where: { provider_id: source.id, pair_id: pair.id },
+            order: { recorded_at: "DESC" },
+          });
+          const sameQuote =
+            latestHistory &&
+            latestHistory.buy_scaled === entity.buy_scaled &&
+            latestHistory.sell_scaled === entity.sell_scaled &&
+            latestHistory.status === quote.status;
+          const sameDay =
+            latestHistory?.recorded_at.toISOString().slice(0, 10) ===
+            quote.observedAt.toISOString().slice(0, 10);
+          if (!sameQuote || !sameDay) {
+            await this.historyRepo.save(
+              this.historyRepo.create({
+                provider_id: source.id,
+                pair_id: pair.id,
+                buy_scaled: entity.buy_scaled,
+                sell_scaled: entity.sell_scaled,
+                scale: SCALE,
+                status: quote.status,
+                sync_run_id: run.id,
+                recorded_at: quote.observedAt,
+              }),
+            );
+          }
           quoteCount += 1;
         }
       }
@@ -119,8 +138,23 @@ export class RatesService {
       .where("history.pair_id = :pairId", { pairId: pair.id })
       .andWhere("history.recorded_at >= :since", { since })
       .orderBy("history.recorded_at", "ASC")
+      .addOrderBy("history.provider_id", "ASC")
       .getMany();
-    return rows.map((row) => ({
+    const providers = await this.providerRepo.find();
+    const uniqueRows = new Map<string, QuoteHistory>();
+    for (const row of rows) {
+      const day = row.recorded_at.toISOString().slice(0, 10);
+      const key = `${row.provider_id}:${day}:${row.buy_scaled}:${row.sell_scaled ?? "null"}:${row.status}`;
+      if (!uniqueRows.has(key)) uniqueRows.set(key, row);
+    }
+    return [...uniqueRows.values()].map((row) => ({
+      id: row.id,
+      provider:
+        providers.find((item) => item.id === row.provider_id)?.code ??
+        "UNKNOWN",
+      providerName:
+        providers.find((item) => item.id === row.provider_id)?.name ??
+        "Fuente desconocida",
       buy: row.buy_scaled / row.scale,
       sell: row.sell_scaled === null ? null : row.sell_scaled / row.scale,
       status: row.status,
