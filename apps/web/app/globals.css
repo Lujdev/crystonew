@@ -1046,12 +1046,14 @@ button {
 }
 
 .payment-field select option {
-  color: #111827;
+  color: #ffffff;
+  background: #16243c;
 }
 
-.payment-document-row select {
+.payment-field select {
   padding: 0 9px;
   font-weight: 800;
+  color-scheme: dark;
 }
 
 .payment-error {
