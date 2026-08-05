@@ -1,0 +1,15 @@
+.git
+.turbo
+node_modules
+**/node_modules
+**/.next
+**/dist
+data
+backups
+logs
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+.env
+coverage
+*.log

@@ -1,7 +1,7 @@
 import type { MigrationInterface, QueryRunner } from "typeorm";
 
-export class MagicLinkPlan2026080502 implements MigrationInterface {
-  name = "MagicLinkPlan2026080502";
+export class MagicLinkPlan2026080500002 implements MigrationInterface {
+  name = "MagicLinkPlan2026080500002";
 
   async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
