@@ -1,36 +1,28 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Header } from "../../components/header";
+import { HistoryView } from "../../components/history-view";
+
 export const metadata: Metadata = {
   title: "Histórico de tasas",
-  description: "Consulta el histórico de las tasas de cambio venezolanas.",
+  description: "Explora el histórico de las tasas de cambio venezolanas.",
 };
+
 export default function HistoryPage() {
   return (
-    <>
+    <div className="site-shell">
       <Header />
-      <main className="container py-16">
-        <p className="text-sm font-bold uppercase tracking-[.25em] text-green-300">
-          Histórico
-        </p>
-        <h1 className="mt-4 text-4xl font-black">
-          La evolución detrás de la tasa.
-        </h1>
-        <p className="mt-4 max-w-2xl leading-7 muted">
-          Explora los registros por par, proveedor y período. La visualización
-          interactiva llegará sobre el mismo histórico que alimenta la API.
-        </p>
-        <div className="panel mt-10 p-8">
-          <p className="text-lg font-bold">Histórico disponible</p>
-          <p className="mt-2 muted">
-            Usa `/v1/history/USD/VES?days=30` desde la API mientras construimos
-            las gráficas.
+      <main className="container history-page">
+        <section className="history-intro">
+          <p className="eyebrow">Histórico · señal que permanece</p>
+          <h1>La evolución detrás de la tasa.</h1>
+          <p>
+            Compara períodos, cambia de par y entiende el contexto detrás de
+            cada lectura. Los eventos se conservan para que una cifra de hoy
+            tenga memoria.
           </p>
-          <Link className="button button-primary mt-6" href="/docs">
-            Ver API
-          </Link>
-        </div>
+        </section>
+        <HistoryView />
       </main>
-    </>
+    </div>
   );
 }
