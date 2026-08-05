@@ -25,6 +25,13 @@
   --calc-violet: #4938d5;
   --calc-green: #2bd27f;
   --calc-orange: #ff9d46;
+  --calc-text: #f6f8ff;
+  --calc-muted: #8fa1bc;
+  --calc-label: #9baac1;
+  --calc-secondary: #8192ad;
+  --calc-tab: #a5b5ce;
+  --calc-icon-blue: #7fa0ff;
+  --calc-option-bg: #16243c;
   --shadow: 0 28px 90px rgb(0 0 0 / 34%);
   --radius-lg: 28px;
   --radius-md: 18px;
@@ -57,6 +64,13 @@
   --calc-violet: #4c3bc8;
   --calc-green: #168c50;
   --calc-orange: #c65c16;
+  --calc-text: #17233a;
+  --calc-muted: #64748b;
+  --calc-label: #52647e;
+  --calc-secondary: #65758e;
+  --calc-tab: #52627c;
+  --calc-icon-blue: #345fe4;
+  --calc-option-bg: #ffffff;
   --shadow: 0 28px 90px rgb(45 38 16 / 12%);
 }
 
@@ -455,7 +469,7 @@ button {
   border: 0;
   border-radius: 9px;
   background: transparent;
-  color: #a5b5ce;
+  color: var(--calc-tab);
   font-size: 0.76rem;
   font-weight: 900;
 }
@@ -470,7 +484,7 @@ button {
 
 .calculator-tabs button.active {
   background: var(--calc-surface-strong);
-  color: #ffffff;
+  color: var(--calc-text);
   box-shadow: 0 4px 15px rgb(0 0 0 / 20%);
 }
 
@@ -484,7 +498,7 @@ button {
   justify-content: space-between;
   gap: 12px;
   margin-top: 19px;
-  color: #9baac1;
+  color: var(--calc-label);
   font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.04em;
@@ -492,7 +506,7 @@ button {
 }
 
 .calculator-label-row span {
-  color: #8192ad;
+  color: var(--calc-secondary);
   font-size: 0.64rem;
   letter-spacing: 0;
   text-transform: none;
@@ -530,7 +544,7 @@ button {
   border: 0;
   outline: 0;
   background: transparent;
-  color: #ffffff;
+  color: var(--calc-text);
   font-family: var(--font-display);
   font-size: 1.7rem;
   letter-spacing: -0.08em;
@@ -538,7 +552,7 @@ button {
 
 .calculator-input strong,
 .calculator-result small {
-  color: #9baac1;
+  color: var(--calc-label);
   font-size: 0.78rem;
   white-space: nowrap;
 }
@@ -563,7 +577,7 @@ button {
 
 .calculator-result .result-symbol {
   background: rgb(77 115 255 / 18%);
-  color: #7fa0ff;
+  color: var(--calc-icon-blue);
 }
 
 .calculator-result strong {
@@ -689,7 +703,7 @@ button {
     rgb(77 115 255 / 17%),
     var(--calc-surface)
   );
-  color: #ffffff;
+  color: var(--calc-text);
 }
 
 .primary-result-head,
@@ -715,7 +729,7 @@ button {
 .primary-result-head small,
 .primary-result-values small,
 .primary-result-values em {
-  color: #8fa1bc;
+  color: var(--calc-muted);
   font-size: 0.6rem;
   font-style: normal;
 }
@@ -735,7 +749,7 @@ button {
   border-radius: 9px;
   padding: 0 8px;
   background: rgb(77 115 255 / 16%);
-  color: #b7c7ff;
+  color: var(--calc-blue);
   font-size: 0.62rem;
   font-weight: 900;
   white-space: nowrap;
@@ -780,7 +794,7 @@ button {
 }
 
 .primary-result-total strong {
-  color: #ffffff;
+  color: var(--calc-text);
   font-size: 1.75rem;
 }
 
@@ -797,7 +811,7 @@ button {
   border-radius: 15px;
   padding: 13px;
   background: var(--calc-surface);
-  color: #ffffff;
+  color: var(--calc-text);
 }
 
 .calculator-quote.selected {
@@ -840,14 +854,14 @@ button {
 }
 
 .quote-head small {
-  color: #8fa1bc;
+  color: var(--calc-muted);
   font-size: 0.58rem;
   font-weight: 700;
 }
 
 .quote-rate {
   margin-top: 13px;
-  color: #ffffff;
+  color: var(--calc-text);
   font-family: var(--font-display);
   font-size: 1.15rem;
   letter-spacing: -0.06em;
@@ -855,7 +869,7 @@ button {
 }
 
 .quote-rate small {
-  color: #8fa1bc;
+  color: var(--calc-muted);
   font-family: var(--font-body);
   font-size: 0.58rem;
   letter-spacing: 0;
@@ -863,7 +877,7 @@ button {
 
 .quote-total-label {
   margin-top: 15px;
-  color: #8fa1bc;
+  color: var(--calc-muted);
   font-size: 0.61rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -888,7 +902,7 @@ button {
 .quote-delta-total {
   display: block;
   margin-top: 3px;
-  color: #8fa1bc;
+  color: var(--calc-muted);
   font-size: 0.58rem;
 }
 
@@ -982,7 +996,7 @@ button {
 }
 
 .payment-summary span {
-  color: #8fa1bc;
+  color: var(--calc-muted);
   font-size: 0.62rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -990,7 +1004,7 @@ button {
 
 .payment-summary strong {
   margin-top: 7px;
-  color: #ffffff;
+  color: var(--calc-text);
   font-family: var(--font-display);
   font-size: 1.15rem;
   letter-spacing: -0.05em;
@@ -1011,7 +1025,7 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #aebdd3;
+  color: var(--calc-label);
   font-size: 0.72rem;
   font-weight: 800;
 }
@@ -1027,7 +1041,7 @@ button {
   outline: none;
   padding: 0 13px;
   background: var(--calc-surface);
-  color: #ffffff;
+  color: var(--calc-text);
   font-size: 0.86rem;
 }
 
@@ -1046,14 +1060,18 @@ button {
 }
 
 .payment-field select option {
-  color: #ffffff;
-  background: #16243c;
+  color: var(--calc-text);
+  background: var(--calc-option-bg);
 }
 
 .payment-field select {
   padding: 0 9px;
   font-weight: 800;
   color-scheme: dark;
+}
+
+:root[data-theme="light"] .payment-field select {
+  color-scheme: light;
 }
 
 .payment-error {
@@ -1068,7 +1086,7 @@ button {
   align-items: start;
   gap: 7px;
   margin: 15px 0 0;
-  color: #8192ad;
+  color: var(--calc-secondary);
   font-size: 0.68rem;
   line-height: 1.45;
 }
