@@ -29,7 +29,7 @@ export function RateDashboard() {
       <div className="dashboard-head"><div><p className="eyebrow">Producto · tasas en vivo</p><h1>La tasa, clara.</h1><p>Compara referencias, calcula tu resultado y entiende cuánto cambia tu operación en cada fuente.</p></div><span className="status-pill"><Wifi size={14} /> {loading ? "Actualizando" : "En línea"}</span></div>
       <div style={{ marginTop: 16 }}><CalculatorCard /></div>
       <section className="metric-grid" aria-label="Resumen de tasas">
-        <article className="card metric-card"><div className="metric-label"><span>BCV oficial · USD</span><span>USD/VES</span></div><div className="metric-value">Bs. {money(usd.buy)}</div><div className="metric-foot"><CheckCircle2 size={14} /> Verificada</div></article>
+        <article className="card metric-card"><div className="metric-label"><span>BCV · USD</span><span>USD/VES</span></div><div className="metric-value">Bs. {money(usd.buy)}</div><div className="metric-foot"><CheckCircle2 size={14} /> Verificada</div></article>
         <article className="card metric-card coral"><div className="metric-label"><span>Mercado P2P · USDT</span><span>USDT/VES</span></div><div className="metric-value">Bs. {money(usdt.buy)}</div><div className="metric-foot" style={{ color: "var(--coral)" }}>+{spread.toFixed(2)}% sobre BCV</div></article>
         <article className="card metric-card"><div className="metric-label"><span>Lecturas activas</span><span>Fuentes</span></div><div className="metric-value">{rates.length}</div><div className="metric-foot"><RefreshCw size={14} /> Histórico guardado</div></article>
       </section>

@@ -14,7 +14,7 @@ import { Header } from "../components/header";
 
 const rates = [
   {
-    provider: "BCV oficial",
+    provider: "BCV",
     pair: "USD / VES",
     value: "744,23",
     tone: "",
@@ -28,7 +28,7 @@ const rates = [
     Icon: Bitcoin,
   },
   {
-    provider: "BCV oficial",
+    provider: "BCV",
     pair: "EUR / VES",
     value: "846,07",
     tone: "",
