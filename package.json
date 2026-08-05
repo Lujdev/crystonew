@@ -1,0 +1,22 @@
+{
+  "name": "crystodolar",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.15.0",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "check": "turbo check",
+    "test": "turbo test",
+    "db:migrate": "pnpm --filter @crystodolar/api migration:run",
+    "db:seed": "pnpm --filter @crystodolar/api seed",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.11",
+    "turbo": "^2.5.6",
+    "typescript": "^6.0.2"
+  }
+}

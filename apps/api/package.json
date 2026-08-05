@@ -1,0 +1,43 @@
+{
+  "name": "@crystodolar/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "nest build",
+    "dev": "nest start --watch",
+    "start": "node dist/main.js",
+    "check": "biome check src && tsc --noEmit",
+    "test": "jest --runInBand",
+    "migration:run": "typeorm migration:run -d dist/database/data-source.js",
+    "seed": "node dist/database/seeds/run-seeds.js"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/core": "^11.0.1",
+    "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/schedule": "^6.1.0",
+    "@nestjs/swagger": "^11.2.4",
+    "@nestjs/terminus": "^11.0.0",
+    "@nestjs/throttler": "^6.5.0",
+    "@nestjs/typeorm": "^11.0.0",
+    "better-sqlite3": "^13.0.2",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
+    "dotenv": "^17.2.3",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "typeorm": "^0.3.28"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.11",
+    "@nestjs/cli": "^11.0.0",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.0",
+    "jest": "^30.0.0",
+    "ts-jest": "^29.2.5",
+    "tsx": "^4.20.3",
+    "typescript": "^6.0.2"
+  }
+}
