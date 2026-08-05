@@ -43,7 +43,12 @@ También puedes ejecutar todo con Docker:
 
 ```bash
 docker compose up --build
+docker compose exec -T api node dist/database/seeds/run-seeds.js
+docker compose restart api
 ```
+
+En el primer arranque, ejecuta el seed y reinicia la API para cargar las monedas,
+fuentes, pares y planes iniciales en SQLite.
 
 ## API pública
 
