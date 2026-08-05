@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Sans, Space_Grotesk } from "next/font/google";
+import { DomainAnnouncement } from "../components/domain-announcement";
 import { ThemeProvider } from "../components/theme-provider";
 import "./globals.css";
 
@@ -52,7 +53,10 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <body className={`${bodyFont.variable} ${displayFont.variable}`}>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <DomainAnnouncement />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
