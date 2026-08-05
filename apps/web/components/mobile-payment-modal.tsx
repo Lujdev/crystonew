@@ -16,7 +16,7 @@ type Props = {
 };
 
 const money = (value: number) => value.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const clipboardMoney = (value: number) => value.toLocaleString("es-VE", { maximumFractionDigits: 2 });
+const clipboardMoney = (value: number) => value.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const documentPattern = /^\d{6,10}$/;
 const phonePattern = /^04\d{9}$/;
 
