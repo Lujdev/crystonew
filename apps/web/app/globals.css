@@ -2,16 +2,16 @@
 
 :root {
   color-scheme: dark;
-  --bg: #080808;
-  --bg-soft: #101011;
-  --surface: #151517;
-  --surface-strong: #1c1c20;
-  --surface-muted: #111113;
-  --line: rgba(255, 255, 255, 0.12);
-  --line-strong: rgba(255, 255, 255, 0.2);
-  --text: #f8f7f3;
-  --muted: #a4a3a0;
-  --subtle: #686866;
+  --bg: #070d1b;
+  --bg-soft: #0c1426;
+  --surface: #101a2e;
+  --surface-strong: #192945;
+  --surface-muted: #0d172a;
+  --line: rgba(131, 157, 205, 0.18);
+  --line-strong: rgba(151, 176, 222, 0.3);
+  --text: #f6f8ff;
+  --muted: #9aa9c0;
+  --subtle: #697b99;
   --brand: #f7dc38;
   --brand-strong: #ffd21f;
   --lime: #8ce38b;
@@ -74,7 +74,7 @@ body {
   background:
     radial-gradient(
       circle at 72% 0%,
-      color-mix(in srgb, var(--brand) 8%, transparent),
+      color-mix(in srgb, var(--calc-blue) 12%, transparent),
       transparent 26rem
     ),
     radial-gradient(
@@ -679,9 +679,88 @@ button {
   color: var(--brand);
 }
 
+.calculator-primary-result {
+  margin-top: 13px;
+  border: 1px solid color-mix(in srgb, var(--calc-blue) 70%, var(--calc-line));
+  border-radius: 16px;
+  padding: 14px;
+  background: linear-gradient(
+    145deg,
+    rgb(77 115 255 / 17%),
+    var(--calc-surface)
+  );
+  color: #ffffff;
+}
+
+.primary-result-head,
+.primary-result-values {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.primary-result-head {
+  color: #8eacff;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.primary-result-head span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.primary-result-head small,
+.primary-result-values small,
+.primary-result-values em {
+  color: #8fa1bc;
+  font-size: 0.6rem;
+  font-style: normal;
+}
+
+.primary-result-values {
+  align-items: end;
+  margin-top: 13px;
+}
+
+.primary-result-values > div {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.primary-result-values > div:first-child {
+  flex-wrap: wrap;
+  max-width: 42%;
+}
+
+.primary-result-values > div:first-child small {
+  width: 100%;
+}
+
+.primary-result-values strong {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  letter-spacing: -0.07em;
+  white-space: nowrap;
+}
+
+.primary-result-values > .primary-result-total {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+}
+
+.primary-result-total strong {
+  color: #ffffff;
+  font-size: 1.75rem;
+}
+
 .calculator-quotes {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin-top: 13px;
 }

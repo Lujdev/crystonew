@@ -92,29 +92,35 @@ export function CalculatorCard({ compact = false }: { compact?: boolean }) {
           <input id="calculator-amount" value={amount} onChange={(event) => setAmount(event.target.value)} inputMode="decimal" aria-label={`Monto en ${currency}`} />
           <strong>{currency}</strong>
         </div>
-        <div className="calculator-result-label">Resultados para {amount || "0"} {currency}</div>
+        <div className="calculator-primary-result">
+          <div className="primary-result-head"><span><SelectedIcon size={14} /> {currency} · {currencyMeta[currency].provider}</span><small>Tasa base</small></div>
+          <div className="primary-result-values">
+            <div><small>Tasa</small><strong>Bs. {money(selectedRate.buy)}</strong><em>/ {currency}</em></div>
+            <div className="primary-result-total"><small>Recibes en VES · {amount || "0"} {currency}</small><strong>Bs. {money(numericAmount * selectedRate.buy)}</strong></div>
+          </div>
+        </div>
+        <div className="calculator-result-label">Compara las otras monedas</div>
         <div className="calculator-quotes" aria-label="Resultados por moneda">
-          {(Object.keys(currencyMeta) as Currency[]).map((quoteCurrency) => {
+          {(Object.keys(currencyMeta) as Currency[]).filter((quoteCurrency) => quoteCurrency !== currency).map((quoteCurrency) => {
             const quoteMeta = currencyMeta[quoteCurrency];
             const QuoteIcon = quoteMeta.Icon;
             const quoteRate = ratesByCurrency[quoteCurrency];
-            const isSelected = quoteCurrency === currency;
             const deltaPerUnit = quoteRate.buy - selectedRate.buy;
             const deltaTotal = numericAmount * deltaPerUnit;
             const isGain = deltaPerUnit > 0.005;
             const isLoss = deltaPerUnit < -0.005;
             const DeltaIcon = isGain ? ArrowUpRight : ArrowDownRight;
             return (
-              <article className={`calculator-quote quote-${quoteCurrency.toLowerCase()} ${isSelected ? "selected" : ""}`} key={quoteCurrency}>
-                <div className="quote-head"><span><QuoteIcon size={14} /> {quoteCurrency}</span><small>{isSelected ? "Base" : quoteMeta.provider}</small></div>
+              <article className={`calculator-quote quote-${quoteCurrency.toLowerCase()}`} key={quoteCurrency}>
+                <div className="quote-head"><span><QuoteIcon size={14} /> {quoteCurrency}</span><small>{quoteMeta.provider}</small></div>
                 <div className="quote-rate">Bs. {money(quoteRate.buy)} <small>/ {quoteCurrency}</small></div>
                 <div className="quote-total-label">Recibes en VES</div>
                 <div className="quote-total">Bs. {money(numericAmount * quoteRate.buy)}</div>
-                <div className={`quote-delta ${isSelected ? "selected-reference" : isGain ? "gain" : isLoss ? "loss" : "selected-reference"}`}>
-                  {isSelected ? <CheckCircle2 size={13} /> : <DeltaIcon size={13} />}
-                  {isSelected ? "Referencia seleccionada" : `${isGain ? "Ganas" : "Pierdes"} ${isGain ? "+" : "−"}Bs. ${money(Math.abs(deltaPerUnit))} por unidad`}
+                <div className={`quote-delta ${isGain ? "gain" : isLoss ? "loss" : "selected-reference"}`}>
+                  <DeltaIcon size={13} />
+                  {`${isGain ? "Ganas" : "Pierdes"} ${isGain ? "+" : "−"}Bs. ${money(Math.abs(deltaPerUnit))} por unidad`}
                 </div>
-                {!isSelected && <small className="quote-delta-total">{isGain ? "+" : "−"}Bs. {money(Math.abs(deltaTotal))} en este monto</small>}
+                <small className="quote-delta-total">{isGain ? "+" : "−"}Bs. {money(Math.abs(deltaTotal))} en este monto</small>
               </article>
             );
           })}
