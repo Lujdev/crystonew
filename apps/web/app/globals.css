@@ -35,8 +35,8 @@
   --shadow: 0 28px 90px rgb(0 0 0 / 34%);
   --radius-lg: 28px;
   --radius-md: 18px;
-  --font-display: "Arial Black", "Trebuchet MS", sans-serif;
-  --font-body: "Avenir Next", "Segoe UI", sans-serif;
+  --font-display: "Space Grotesk", "Trebuchet MS", sans-serif;
+  --font-body: "DM Sans", "Segoe UI", sans-serif;
 }
 
 :root[data-theme="light"] {
@@ -83,6 +83,9 @@ html {
 }
 
 body {
+  --font-display:
+    var(--font-display-google), "Space Grotesk", "Trebuchet MS", sans-serif;
+  --font-body: var(--font-body-google), "DM Sans", "Segoe UI", sans-serif;
   min-height: 100vh;
   margin: 0;
   background:
@@ -911,7 +914,9 @@ button {
   z-index: 100;
   display: grid;
   inset: 0;
-  overflow: auto;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
   place-items: center;
   padding: 18px;
   background: rgb(3 8 20 / 76%);
@@ -921,11 +926,25 @@ button {
 .payment-modal {
   width: min(100%, 520px);
   max-height: calc(100vh - 36px);
-  overflow: auto;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid var(--calc-line);
   border-radius: 22px;
   background: var(--calc-bg);
   box-shadow: 0 30px 100px rgb(0 0 0 / 46%);
+}
+
+@supports (height: 100dvh) {
+  .payment-overlay {
+    height: 100dvh;
+  }
+
+  .payment-modal {
+    max-height: calc(100dvh - 36px);
+  }
 }
 
 .payment-modal-head {
@@ -2339,6 +2358,36 @@ button {
 
   .calculator-card-compact {
     transform: none;
+  }
+
+  .payment-overlay {
+    align-items: end;
+    justify-items: center;
+    padding: max(12px, env(safe-area-inset-top))
+      max(10px, env(safe-area-inset-right))
+      max(10px, env(safe-area-inset-bottom))
+      max(10px, env(safe-area-inset-left));
+  }
+
+  .payment-modal {
+    width: 100%;
+    max-width: 520px;
+    max-height: calc(100vh - max(22px, env(safe-area-inset-top)));
+    border-radius: 22px 22px 14px 14px;
+  }
+
+  @supports (height: 100dvh) {
+    .payment-modal {
+      max-height: calc(100dvh - max(22px, env(safe-area-inset-top)));
+    }
+  }
+
+  .payment-field input,
+  .payment-field select,
+  .payment-document-row input,
+  .payment-document-row select {
+    min-width: 0;
+    font-size: 1rem;
   }
 
   .hero-orbit {
