@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "CrystoDolar",
     short_name: "CrystoDolar",
     description: "Tasas venezolanas en tiempo real",
-    start_url: "/app",
+    start_url: "/",
     display: "standalone",
     background_color: "#020617",
     theme_color: "#020617",

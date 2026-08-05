@@ -70,7 +70,7 @@ export default function HomePage() {
               <span>Sin SDK obligatorio</span>
             </div>
           </div>
-          <div className="hero-stage">
+          <div className="hero-stage" id="calculadora">
             <CalculatorCard compact />
           </div>
         </section>
@@ -164,8 +164,8 @@ export default function HomePage() {
                 </p>
               </div>
               <div className="hero-actions">
-                <Link className="button button-primary" href="/app">
-                  Ver tasas <ArrowUpRight size={16} />
+                <Link className="button button-primary" href="/#calculadora">
+                  Usar calculadora <ArrowUpRight size={16} />
                 </Link>
                 <Link className="button button-secondary" href="/verify">
                   Obtener API key
