@@ -1,9 +1,11 @@
 import {
   ArrowRight,
   ArrowUpRight,
-  BarChart3,
+  Bitcoin,
   Code2,
   Database,
+  Euro,
+  Landmark,
   ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
@@ -11,14 +13,27 @@ import { CalculatorCard } from "../components/calculator-card";
 import { Header } from "../components/header";
 
 const rates = [
-  { provider: "BCV oficial", pair: "USD / VES", value: "744,23", tone: "" },
+  {
+    provider: "BCV oficial",
+    pair: "USD / VES",
+    value: "744,23",
+    tone: "",
+    Icon: Landmark,
+  },
   {
     provider: "Mercado P2P",
     pair: "USDT / VES",
     value: "845,99",
     tone: "coral",
+    Icon: Bitcoin,
   },
-  { provider: "BCV oficial", pair: "EUR / VES", value: "846,07", tone: "" },
+  {
+    provider: "BCV oficial",
+    pair: "EUR / VES",
+    value: "846,07",
+    tone: "",
+    Icon: Euro,
+  },
 ];
 
 export default function HomePage() {
@@ -86,7 +101,7 @@ export default function HomePage() {
                   >
                     <div className="rate-provider">
                       <span className={`source-icon ${rate.tone}`}>
-                        <BarChart3 size={17} />
+                        <rate.Icon size={17} />
                       </span>
                       <div>
                         <strong>{rate.provider}</strong>

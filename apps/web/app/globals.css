@@ -208,6 +208,7 @@ button {
   border: 1px solid transparent;
   border-radius: 13px;
   padding: 0 18px;
+  white-space: nowrap;
   font-size: 0.9rem;
   font-weight: 800;
   letter-spacing: -0.01em;
@@ -368,7 +369,13 @@ button {
   justify-content: space-between;
   gap: 16px;
   padding: 20px 22px 18px;
-  background: linear-gradient(118deg, #e8c928, #9d8af7 73%, #7c6be8);
+  background: linear-gradient(
+    112deg,
+    #f2d135 0%,
+    #e9d875 28%,
+    #b6a0e9 68%,
+    #755bf1 100%
+  );
   color: #171717;
 }
 
@@ -403,6 +410,15 @@ button {
   color: rgb(23 23 23 / 68%);
   font-size: 0.67rem;
   font-weight: 800;
+}
+
+.calculator-sources span,
+.calculator-tabs button,
+.comparison-top span,
+.comparison-top b {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .calculator-live {
@@ -456,12 +472,18 @@ button {
 
 .calculator-tabs button span {
   color: var(--subtle);
-  font-family: Georgia, serif;
-  font-size: 1rem;
+}
+
+.calculator-tabs button svg {
+  color: var(--subtle);
 }
 
 .calculator-tabs button.active {
-  background: var(--surface-strong);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--surface-strong) 92%, var(--brand)),
+    var(--surface-strong)
+  );
   color: var(--text);
   box-shadow: 0 4px 15px rgb(0 0 0 / 20%);
 }
@@ -513,7 +535,6 @@ button {
   border-radius: 10px;
   background: color-mix(in srgb, var(--lime) 14%, transparent);
   color: var(--lime);
-  font-family: Georgia, serif;
   font-size: 1.2rem;
 }
 
@@ -577,26 +598,53 @@ button {
 }
 
 .calculator-insight > div {
-  display: grid;
-  gap: 6px;
+  display: block;
 }
 
-.calculator-insight span {
-  display: inline-flex;
+.comparison-top {
+  display: flex;
   align-items: center;
-  gap: 5px;
+  justify-content: space-between;
+  gap: 7px;
+}
+
+.comparison-top span {
   color: var(--muted);
   font-size: 0.67rem;
-  font-weight: 800;
+  font-weight: 900;
 }
 
-.calculator-insight strong {
+.comparison-top span small {
+  color: var(--subtle);
+  font-size: 0.59rem;
+  font-weight: 700;
+}
+
+.comparison-top b {
+  font-size: 0.61rem;
+  white-space: nowrap;
+}
+
+.comparison-rate {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.comparison-rate strong {
   font-family: var(--font-display);
-  font-size: 1.18rem;
+  font-size: 1.24rem;
   letter-spacing: -0.06em;
 }
 
-.calculator-insight small {
+.comparison-rate span {
+  color: var(--subtle);
+  font-size: 0.6rem;
+}
+
+.calculator-insight > small {
   display: block;
   margin-top: 7px;
   color: var(--subtle);
@@ -604,21 +652,40 @@ button {
   line-height: 1.35;
 }
 
-.insight-usdt {
-  border-color: color-mix(in srgb, var(--coral) 38%, var(--line));
+.comparison-gain {
+  border-color: color-mix(in srgb, var(--lime) 42%, var(--line));
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--lime) 8%, var(--surface-muted)),
+    var(--surface-muted)
+  );
 }
 
-.insight-usdt strong,
-.insight-usdt span {
+.comparison-gain .comparison-top b,
+.comparison-gain .comparison-rate strong {
+  color: var(--lime);
+}
+
+.comparison-loss {
+  border-color: color-mix(in srgb, var(--coral) 42%, var(--line));
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--coral) 8%, var(--surface-muted)),
+    var(--surface-muted)
+  );
+}
+
+.comparison-loss .comparison-top b,
+.comparison-loss .comparison-rate strong {
   color: var(--coral);
 }
 
-.insight-eur {
-  border-color: color-mix(in srgb, var(--brand) 35%, var(--line));
+.comparison-neutral {
+  border-color: color-mix(in srgb, var(--brand) 38%, var(--line));
 }
 
-.insight-eur strong,
-.insight-eur span {
+.comparison-neutral .comparison-top b,
+.comparison-neutral .comparison-rate strong {
   color: var(--brand);
 }
 
@@ -836,7 +903,7 @@ button {
 
 .home-rates {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.55fr);
   gap: 16px;
 }
 
@@ -921,17 +988,21 @@ button {
 
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr;
   gap: 16px;
 }
 
 .feature-card {
-  min-height: 218px;
-  padding: 24px;
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  column-gap: 14px;
+  align-items: start;
+  min-height: 0;
+  padding: 22px;
 }
 
 .feature-card h3 {
-  margin: 42px 0 10px;
+  margin: 2px 0 8px;
   font-size: 1.08rem;
   letter-spacing: -0.03em;
 }
@@ -945,12 +1016,19 @@ button {
 
 .feature-icon {
   display: grid;
+  grid-row: span 2;
   width: 42px;
   height: 42px;
   place-items: center;
   border: 1px solid var(--line);
   border-radius: 14px;
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--brand) 18%, var(--surface)),
+    color-mix(in srgb, var(--violet) 15%, var(--surface))
+  );
   color: var(--brand);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%);
 }
 
 .cta-panel {
@@ -1649,6 +1727,20 @@ button {
 }
 
 @media (max-width: 960px) {
+  .header-inner {
+    gap: 14px;
+  }
+
+  .header-nav {
+    gap: 14px;
+    font-size: 0.78rem;
+  }
+
+  .header-actions .button {
+    padding: 0 12px;
+    font-size: 0.78rem;
+  }
+
   .hero {
     grid-template-columns: 1fr;
     gap: 20px;
@@ -1662,6 +1754,10 @@ button {
   .home-rates,
   .dashboard-grid,
   .verify-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .feature-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1720,19 +1816,23 @@ button {
 
   .hero {
     min-height: auto;
-    padding: 58px 0 62px;
+    padding: 24px 0 62px;
+  }
+
+  .hero-stage {
+    order: -1;
+    min-height: auto;
+    margin: 0 0 28px;
+    transform: none;
+  }
+
+  .hero-stage > .calculator-card {
+    width: 100%;
   }
 
   .hero-copy p:not(.eyebrow) {
     font-size: 1rem;
     line-height: 1.6;
-  }
-
-  .hero-stage {
-    min-height: 360px;
-    transform: scale(0.92);
-    transform-origin: center top;
-    margin-bottom: -24px;
   }
 
   .calculator-insights {
