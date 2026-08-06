@@ -18,7 +18,10 @@ RUN addgroup -S crysto && adduser -S crysto -G crysto
 COPY --from=build /repo/apps/api/dist ./dist
 COPY --from=build /prod/api/node_modules ./node_modules
 COPY --from=build /prod/api/package.json ./package.json
-RUN mkdir -p /app/data /app/backups /app/logs && chown -R crysto:crysto /app
+COPY --chown=crysto:crysto infra/docker/api-entrypoint.sh ./api-entrypoint.sh
+RUN mkdir -p /app/data /app/backups /app/logs \
+  && chmod +x /app/api-entrypoint.sh \
+  && chown -R crysto:crysto /app
 USER crysto
 EXPOSE 3001
-CMD ["node", "dist/main.js"]
+CMD ["./api-entrypoint.sh"]
