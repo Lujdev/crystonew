@@ -75,6 +75,14 @@ Planes iniciales mensuales:
 
 Las claves se almacenan como hash. El registro inicial se hace por magic link, permite escoger `free` o `development`, y la clave se muestra una sola vez en el flujo de verificación.
 
+Las solicitudes de magic link tienen un límite por correo para evitar abuso. Se puede configurar con estas variables:
+
+```text
+MAGIC_LINK_RATE_LIMIT=3          # solicitudes máximas por ventana
+MAGIC_LINK_RATE_WINDOW_MS=3600000 # ventana móvil en milisegundos
+MAGIC_LINK_RATE_COOLDOWN_MS=60000  # espera mínima entre solicitudes
+```
+
 ## Fuentes, monedas e histórico
 
 Los proveedores y monedas son registros de base de datos, no constantes rígidas. Para agregar una fuente se implementa `RateProvider`, se registra su configuración y se vincula a uno o más pares. El histórico se guarda como eventos append-only en `quote_history`, con índices por proveedor, par y fecha.

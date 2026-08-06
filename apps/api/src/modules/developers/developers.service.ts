@@ -1,5 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import {
+  HttpException,
+  HttpStatus,
   Inject,
   Injectable,
   Logger,
@@ -18,6 +20,25 @@ import {
 
 const hash = (value: string): string =>
   createHash("sha256").update(value).digest("hex");
+
+const MAGIC_LINK_RATE_LIMIT_DEFAULT = 3;
+const MAGIC_LINK_RATE_WINDOW_MS_DEFAULT = 60 * 60 * 1000;
+const MAGIC_LINK_RATE_COOLDOWN_MS_DEFAULT = 60 * 1000;
+const MAGIC_LINK_RATE_LIMIT_MESSAGE =
+  "Too many requests. Please try again later.";
+
+export class TooManyRequestsException extends HttpException {
+  constructor(
+    response: string | Record<string, unknown> = MAGIC_LINK_RATE_LIMIT_MESSAGE,
+  ) {
+    super(response, HttpStatus.TOO_MANY_REQUESTS);
+  }
+}
+
+const readPositiveIntegerEnv = (name: string, fallback: number): number => {
+  const value = Number(process.env[name]);
+  return Number.isInteger(value) && value > 0 ? value : fallback;
+};
 
 @Injectable()
 export class DevelopersService {
@@ -41,6 +62,44 @@ export class DevelopersService {
     const email = rawEmail.trim().toLowerCase();
     if (!email.includes("@"))
       throw new UnauthorizedException("Valid email is required");
+
+    const now = new Date();
+    const rateLimit = readPositiveIntegerEnv(
+      "MAGIC_LINK_RATE_LIMIT",
+      MAGIC_LINK_RATE_LIMIT_DEFAULT,
+    );
+    const windowMs = readPositiveIntegerEnv(
+      "MAGIC_LINK_RATE_WINDOW_MS",
+      MAGIC_LINK_RATE_WINDOW_MS_DEFAULT,
+    );
+    const cooldownMs = readPositiveIntegerEnv(
+      "MAGIC_LINK_RATE_COOLDOWN_MS",
+      MAGIC_LINK_RATE_COOLDOWN_MS_DEFAULT,
+    );
+    const windowStart = new Date(now.getTime() - windowMs);
+    const recentRequestCount = await this.magicLinkRepo
+      .createQueryBuilder("magicLink")
+      .where("magicLink.email = :email", { email })
+      .andWhere("magicLink.created_at >= :windowStart", { windowStart })
+      .getCount();
+    const latestRequest = await this.magicLinkRepo
+      .createQueryBuilder("magicLink")
+      .where("magicLink.email = :email", { email })
+      .orderBy("magicLink.created_at", "DESC")
+      .getOne();
+
+    if (recentRequestCount >= rateLimit)
+      throw new TooManyRequestsException(MAGIC_LINK_RATE_LIMIT_MESSAGE);
+
+    const retryAfterMs = latestRequest
+      ? latestRequest.created_at.getTime() + cooldownMs - now.getTime()
+      : 0;
+    if (retryAfterMs > 0)
+      throw new TooManyRequestsException({
+        message: MAGIC_LINK_RATE_LIMIT_MESSAGE,
+        retryAfterSeconds: Math.max(1, Math.ceil(retryAfterMs / 1000)),
+      });
+
     const planCode = requestedPlan === "development" ? "development" : "free";
     const token = randomBytes(32).toString("hex");
     await this.magicLinkRepo.save(

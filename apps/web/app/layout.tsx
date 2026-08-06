@@ -1,8 +1,12 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { DM_Sans, Space_Grotesk } from "next/font/google";
+import Script from "next/script";
 import { DomainAnnouncement } from "../components/domain-announcement";
 import { ThemeProvider } from "../components/theme-provider";
 import "./globals.css";
+
+const GOOGLE_TAG_ID = "G-NL0Y3R9JS8";
 
 const bodyFont = DM_Sans({
   subsets: ["latin"],
@@ -57,6 +61,19 @@ export default function RootLayout({
           <DomainAnnouncement />
           {children}
         </ThemeProvider>
+        <Analytics />
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_TAG_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GOOGLE_TAG_ID}');
+          `}
+        </Script>
       </body>
     </html>
   );
