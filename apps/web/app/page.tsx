@@ -12,31 +12,77 @@ import Link from "next/link";
 import { CalculatorCard } from "../components/calculator-card";
 import { Header } from "../components/header";
 
-const rates = [
-  {
-    provider: "BCV",
-    pair: "USD / VES",
-    value: "744,23",
-    tone: "",
-    Icon: Landmark,
-  },
-  {
-    provider: "Mercado P2P",
-    pair: "USDT / VES",
-    value: "845,99",
-    tone: "coral",
-    Icon: Bitcoin,
-  },
-  {
-    provider: "BCV",
-    pair: "EUR / VES",
-    value: "846,07",
-    tone: "",
-    Icon: Euro,
-  },
-];
+type Rate = {
+  provider: string;
+  pair: string;
+  buy: number;
+  updatedAt: string;
+};
 
-export default function HomePage() {
+const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+const money = (value: number) =>
+  value.toLocaleString("es-VE", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+async function getRates(): Promise<Rate[]> {
+  try {
+    const response = await fetch(`${API}/v1/rates`, { cache: "no-store" });
+    if (!response.ok) return [];
+    return (await response.json()) as Rate[];
+  } catch {
+    return [];
+  }
+}
+
+export default async function HomePage() {
+  const currentRates = await getRates();
+  const usd = currentRates.find(
+    (rate) => rate.provider === "BCV" && rate.pair === "USD/VES",
+  );
+  const usdt = currentRates.find(
+    (rate) => rate.provider === "BINANCE_P2P" && rate.pair === "USDT/VES",
+  );
+  const eur = currentRates.find(
+    (rate) => rate.provider === "BCV" && rate.pair === "EUR/VES",
+  );
+  const latestRate = currentRates.reduce<Rate | undefined>(
+    (latest, rate) =>
+      !latest || rate.updatedAt > latest.updatedAt ? rate : latest,
+    undefined,
+  );
+  const updatedLabel = latestRate
+    ? new Date(latestRate.updatedAt).toLocaleDateString("es-VE", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+    : "Sin datos actuales";
+  const rates = [
+    {
+      provider: "BCV",
+      pair: "USD / VES",
+      value: usd ? money(usd.buy) : "No disponible",
+      tone: "",
+      Icon: Landmark,
+    },
+    {
+      provider: "Mercado P2P",
+      pair: "USDT / VES",
+      value: usdt ? money(usdt.buy) : "No disponible",
+      tone: "coral",
+      Icon: Bitcoin,
+    },
+    {
+      provider: "BCV",
+      pair: "EUR / VES",
+      value: eur ? money(eur.buy) : "No disponible",
+      tone: "",
+      Icon: Euro,
+    },
+  ];
+
   return (
     <div className="site-shell">
       <Header />
@@ -66,7 +112,7 @@ export default function HomePage() {
               <span>
                 <i className="live-dot" /> Fuentes verificadas
               </span>
-              <span>Actualización cada 30 min</span>
+              <span>BCV cada 6 h · mercado cada 1 h</span>
               <span>Sin SDK obligatorio</span>
             </div>
           </div>
@@ -92,7 +138,7 @@ export default function HomePage() {
               <div className="panel rate-showcase">
                 <div className="rate-showcase-head">
                   <span>Principales referencias</span>
-                  <span>Hoy · 05 ago 2026</span>
+                  <span>Actualizado · {updatedLabel}</span>
                 </div>
                 {rates.map((rate) => (
                   <div

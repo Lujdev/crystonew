@@ -6,8 +6,8 @@ import { CalculatorCard } from "./calculator-card";
 
 type Rate = { provider: string; pair: string; buy: number; sell: number | null; status: string; updatedAt: string };
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
-const FALLBACK_UPDATED_AT = "2026-01-01T00:00:00.000Z";
-const FALLBACK_USD: Rate = { provider: "BCV", pair: "USD/VES", buy: 744.23, sell: 744.23, status: "verified", updatedAt: FALLBACK_UPDATED_AT };
+const FALLBACK_UPDATED_AT = "2026-08-07T00:00:00-04:00";
+const FALLBACK_USD: Rate = { provider: "BCV", pair: "USD/VES", buy: 756.7083, sell: 756.7083, status: "verified", updatedAt: FALLBACK_UPDATED_AT };
 const FALLBACK_USDT: Rate = { provider: "BINANCE_P2P", pair: "USDT/VES", buy: 845.99, sell: 850.25, status: "verified", updatedAt: FALLBACK_UPDATED_AT };
 const fallback: Rate[] = [FALLBACK_USD, FALLBACK_USDT];
 

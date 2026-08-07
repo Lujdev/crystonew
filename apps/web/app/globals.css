@@ -495,6 +495,50 @@ button {
   color: var(--calc-blue);
 }
 
+.calculator-direction {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 10px;
+  border: 1px solid var(--calc-line);
+  border-radius: 13px;
+  padding: 4px;
+  background: color-mix(in srgb, var(--calc-surface) 82%, transparent);
+}
+
+.calculator-direction button {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--calc-tab);
+  font-size: 0.67rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.calculator-direction button span {
+  color: var(--calc-muted);
+}
+
+.calculator-direction button.active {
+  background: var(--calc-surface-strong);
+  color: var(--calc-text);
+  box-shadow: 0 4px 15px rgb(0 0 0 / 20%);
+}
+
+.calculator-direction button:focus-visible,
+.bank-picker-trigger:focus-visible,
+.bank-search input:focus-visible,
+.bank-options li:focus-visible {
+  outline: 2px solid var(--calc-blue);
+  outline-offset: 2px;
+}
+
 .calculator-label-row {
   display: flex;
   align-items: center;
@@ -1091,6 +1135,136 @@ button {
 
 :root[data-theme="light"] .payment-field select {
   color-scheme: light;
+}
+
+.bank-picker {
+  position: relative;
+}
+
+.bank-picker-trigger {
+  display: flex;
+  width: 100%;
+  min-height: 46px;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--calc-line);
+  border-radius: 12px;
+  padding: 0 12px;
+  background: var(--calc-surface);
+  color: var(--calc-text);
+  font-size: 0.86rem;
+  text-align: left;
+}
+
+.bank-picker-trigger.open {
+  border-color: var(--calc-blue);
+  box-shadow: 0 0 0 3px rgb(77 115 255 / 15%);
+}
+
+.bank-picker-trigger > span {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  color: var(--calc-text);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bank-picker-trigger > strong {
+  color: var(--calc-blue);
+  font-size: 0.76rem;
+}
+
+button.bank-picker-trigger > svg {
+  flex: 0 0 auto;
+  color: var(--calc-muted);
+  transition: transform 180ms ease;
+}
+
+button.bank-picker-trigger.open > svg {
+  transform: rotate(180deg);
+}
+
+.bank-picker-menu {
+  position: absolute;
+  z-index: 8;
+  top: calc(100% + 7px);
+  right: 0;
+  left: 0;
+  overflow: hidden;
+  border: 1px solid var(--calc-line);
+  border-radius: 14px;
+  background: var(--calc-bg);
+  box-shadow: 0 22px 50px rgb(0 0 0 / 35%);
+}
+
+.bank-search {
+  display: flex;
+  min-height: 45px;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--calc-line);
+  padding: 0 12px;
+  color: var(--calc-muted);
+}
+
+.bank-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--calc-text);
+  font-size: 0.82rem;
+}
+
+.bank-search input::placeholder {
+  color: var(--calc-muted);
+}
+
+.bank-options {
+  max-height: 238px;
+  margin: 0;
+  overflow-y: auto;
+  padding: 5px;
+  list-style: none;
+}
+
+.bank-options li {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 9px;
+  border-radius: 9px;
+  padding: 7px 9px;
+  color: var(--calc-text);
+  cursor: pointer;
+  font-size: 0.76rem;
+  line-height: 1.25;
+}
+
+.bank-options li:hover,
+.bank-options li.highlighted {
+  background: color-mix(in srgb, var(--calc-blue) 14%, var(--calc-surface));
+}
+
+.bank-options li strong {
+  flex: 0 0 35px;
+  color: var(--calc-blue);
+  font-size: 0.7rem;
+}
+
+.bank-options li span {
+  min-width: 0;
+}
+
+.bank-options .bank-options-empty {
+  display: block;
+  padding: 16px 10px;
+  color: var(--calc-muted);
+  cursor: default;
+  text-align: center;
 }
 
 .payment-error {
@@ -2465,8 +2639,7 @@ button {
 }
 
 .domain-announcement {
-  border-bottom: 1px solid
-    color-mix(in srgb, var(--brand) 24%, var(--line));
+  border-bottom: 1px solid color-mix(in srgb, var(--brand) 24%, var(--line));
   background: color-mix(in srgb, var(--brand) 8%, var(--bg));
 }
 
@@ -2548,4 +2721,3 @@ button {
     text-align: left;
   }
 }
-

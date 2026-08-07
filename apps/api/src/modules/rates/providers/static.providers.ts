@@ -1,26 +1,181 @@
 import type { ProviderQuote, RateProvider } from "../../../common/ports";
 
 const now = (): Date => new Date();
+const BCV_URL = process.env.BCV_URL ?? "https://www.bcv.org.ve/";
+const BINANCE_P2P_URL =
+  process.env.BINANCE_P2P_URL ??
+  "https://www.binance.com/bapi/c2c/v1/public/c2c/agent/quote-price";
+const ITALCAMBIO_URL =
+  process.env.ITALCAMBIO_URL ?? "https://www.italcambio.com/divisas.php";
+const SOURCE_TIMEOUT_MS = 10_000;
+
+function parseBcvNumber(value: string): number {
+  const normalized = value.replace(/\s/g, "");
+  const numeric = normalized.includes(",")
+    ? normalized.replace(/\./g, "").replace(",", ".")
+    : normalized;
+  const parsed = Number(numeric);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    throw new Error(`BCV returned an invalid rate: ${value}`);
+  }
+  return parsed;
+}
+
+function extractBcvRate(html: string, currencyId: "dolar" | "euro"): number {
+  const section = html.match(
+    new RegExp(
+      `id=["']${currencyId}["'][\\s\\S]*?(?=id=["'][^"']+["']|$)`,
+      "i",
+    ),
+  )?.[0];
+  const rawRate = section?.match(/<strong[^>]*>([^<]+)<\/strong>/i)?.[1];
+  if (!rawRate) throw new Error(`BCV response does not contain ${currencyId}`);
+  return parseBcvNumber(rawRate);
+}
+
+async function fetchBcvRates(): Promise<{ usd: number; eur: number }> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), SOURCE_TIMEOUT_MS);
+  try {
+    const response = await fetch(BCV_URL, {
+      headers: { Accept: "text/html" },
+      signal: controller.signal,
+    });
+    if (!response.ok) {
+      throw new Error(`BCV request failed with HTTP ${response.status}`);
+    }
+    const html = await response.text();
+    return {
+      usd: extractBcvRate(html, "dolar"),
+      eur: extractBcvRate(html, "euro"),
+    };
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error(`BCV request timed out after ${SOURCE_TIMEOUT_MS}ms`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function fetchText(url: string, source: string): Promise<string> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), SOURCE_TIMEOUT_MS);
+  try {
+    const response = await fetch(url, {
+      headers: { Accept: "text/html" },
+      signal: controller.signal,
+    });
+    if (!response.ok) {
+      throw new Error(`${source} request failed with HTTP ${response.status}`);
+    }
+    return await response.text();
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error(
+        `${source} request timed out after ${SOURCE_TIMEOUT_MS}ms`,
+      );
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function fetchJson(url: string, source: string): Promise<unknown> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), SOURCE_TIMEOUT_MS);
+  try {
+    const response = await fetch(url, {
+      headers: { Accept: "application/json" },
+      signal: controller.signal,
+    });
+    if (!response.ok) {
+      throw new Error(`${source} request failed with HTTP ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error(
+        `${source} request timed out after ${SOURCE_TIMEOUT_MS}ms`,
+      );
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function parseExternalRate(value: unknown, source: string): number {
+  const raw = String(value).replace(/\s/g, "");
+  const numeric =
+    raw.includes(",") && raw.includes(".")
+      ? raw.lastIndexOf(",") > raw.lastIndexOf(".")
+        ? raw.replace(/\./g, "").replace(",", ".")
+        : raw.replace(/,/g, "")
+      : raw.replace(",", ".");
+  const parsed = Number(numeric);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    throw new Error(`${source} returned an invalid rate: ${String(value)}`);
+  }
+  return parsed;
+}
+
+async function fetchBinancePrice(tradeType: "BUY" | "SELL"): Promise<number> {
+  const url = new URL(BINANCE_P2P_URL);
+  url.searchParams.set("fiat", "VES");
+  url.searchParams.set("asset", "USDT");
+  url.searchParams.set("tradeType", tradeType);
+  const payload = (await fetchJson(url.toString(), "Binance P2P")) as {
+    data?: { price?: number | string };
+    success?: boolean;
+  };
+  if (!payload.success || payload.data?.price === undefined) {
+    throw new Error("Binance P2P response does not contain a price");
+  }
+  return parseExternalRate(payload.data.price, "Binance P2P");
+}
+
+function extractItalcambioRates(html: string): { buy: number; sell: number } {
+  const usdLabel = /<p[^>]*>\s*USD\s*<\/p>/i.exec(html);
+  if (usdLabel?.index === undefined) {
+    throw new Error("Italcambio response does not contain USD");
+  }
+  const usdSection = html.slice(usdLabel.index, usdLabel.index + 2_000);
+  const rates = /Compra:\s*([\d.,]+)[\s\S]*?Venta:\s*([\d.,]+)/i.exec(
+    usdSection,
+  );
+  if (!rates) {
+    throw new Error("Italcambio response does not contain USD buy/sell rates");
+  }
+  return {
+    buy: parseExternalRate(rates[1], "Italcambio"),
+    sell: parseExternalRate(rates[2], "Italcambio"),
+  };
+}
 
 export class BcvProvider implements RateProvider {
   readonly code = "BCV";
   async collect(): Promise<ProviderQuote[]> {
+    const rates = await fetchBcvRates();
+    const observedAt = now();
     return [
       {
         providerCode: this.code,
         pairCode: "USD/VES",
-        buy: 744.23,
-        sell: 744.23,
+        buy: rates.usd,
+        sell: rates.usd,
         status: "verified",
-        observedAt: now(),
+        observedAt,
       },
       {
         providerCode: this.code,
         pairCode: "EUR/VES",
-        buy: 846.07,
-        sell: 846.07,
+        buy: rates.eur,
+        sell: rates.eur,
         status: "verified",
-        observedAt: now(),
+        observedAt,
       },
     ];
   }
@@ -29,12 +184,16 @@ export class BcvProvider implements RateProvider {
 export class BinanceP2pProvider implements RateProvider {
   readonly code = "BINANCE_P2P";
   async collect(): Promise<ProviderQuote[]> {
+    const [buy, sell] = await Promise.all([
+      fetchBinancePrice("BUY"),
+      fetchBinancePrice("SELL"),
+    ]);
     return [
       {
         providerCode: this.code,
         pairCode: "USDT/VES",
-        buy: 845.99,
-        sell: 850.25,
+        buy,
+        sell,
         status: "verified",
         observedAt: now(),
       },
@@ -45,12 +204,15 @@ export class BinanceP2pProvider implements RateProvider {
 export class ItalcambiosProvider implements RateProvider {
   readonly code = "ITALCAMBIOS";
   async collect(): Promise<ProviderQuote[]> {
+    const rates = extractItalcambioRates(
+      await fetchText(ITALCAMBIO_URL, "Italcambio"),
+    );
     return [
       {
         providerCode: this.code,
         pairCode: "USD/VES",
-        buy: 842.1,
-        sell: 847.4,
+        buy: rates.buy,
+        sell: rates.sell,
         status: "verified",
         observedAt: now(),
       },

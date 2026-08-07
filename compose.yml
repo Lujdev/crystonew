@@ -7,6 +7,11 @@ services:
       NODE_ENV: production
       API_PORT: 3001
       DATABASE_PATH: /app/data/crystodolar.sqlite
+      BCV_URL: ${BCV_URL:-https://www.bcv.org.ve/}
+      BINANCE_P2P_URL: ${BINANCE_P2P_URL:-https://www.binance.com/bapi/c2c/v1/public/c2c/agent/quote-price}
+      ITALCAMBIO_URL: ${ITALCAMBIO_URL:-https://www.italcambio.com/divisas.php}
+      BCV_SYNC_INTERVAL_MINUTES: ${BCV_SYNC_INTERVAL_MINUTES:-360}
+      MARKET_SYNC_INTERVAL_MINUTES: ${MARKET_SYNC_INTERVAL_MINUTES:-60}
       API_KEY_FREE_MONTHLY_LIMIT: ${API_KEY_FREE_MONTHLY_LIMIT:-500}
       API_KEY_DEVELOPMENT_MONTHLY_LIMIT: ${API_KEY_DEVELOPMENT_MONTHLY_LIMIT:-10000}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
