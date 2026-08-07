@@ -19,8 +19,11 @@ describe("rate providers", () => {
           ok: true,
           status: 200,
           json: async () => ({
-            success: true,
-            data: { items: [{ price: "856.000" }, { price: "861.900" }] },
+            code: "000000",
+            data: [
+              { adv: { price: "856.000" } },
+              { adv: { price: "861.900" } },
+            ],
           }),
         };
       }
@@ -69,7 +72,10 @@ describe("rate providers", () => {
         return {
           ok: true,
           status: 200,
-          json: async () => ({ success: true, data: { items: [{ price: 856 }] } }),
+          json: async () => ({
+            code: "000000",
+            data: [{ adv: { price: 856 } }],
+          }),
         };
       }
       return {
@@ -111,22 +117,27 @@ describe("rate providers", () => {
     );
   });
 
-  test("uses the highest Binance P2P BUY offer from the first ten listings", async () => {
-    global.fetch = jest.fn(async (input) => ({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        success: true,
-        data: {
-          items: [
-            { price: "856" },
-            { price: "861.9" },
-            { price: "invalid" },
-            { price: "0" },
-          ],
-        },
-      }),
-    })) as unknown as typeof fetch;
+  test("uses the highest Binance P2P BUY and SELL offers from ten listings", async () => {
+    global.fetch = jest.fn(
+      async (_input: RequestInfo | URL, init?: RequestInit) => {
+        const payload = JSON.parse(String(init?.body)) as {
+          tradeType: "BUY" | "SELL";
+        };
+        const prices =
+          payload.tradeType === "BUY"
+            ? ["856", "861.9", "invalid", "0"]
+            : ["850", "864.2", "invalid", "0"];
+
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            code: "000000",
+            data: prices.map((price) => ({ adv: { price } })),
+          }),
+        };
+      },
+    ) as unknown as typeof fetch;
 
     const quotes = await new BinanceP2pProvider().collect();
 
@@ -135,24 +146,62 @@ describe("rate providers", () => {
         providerCode: "BINANCE_P2P",
         pairCode: "USDT/VES",
         buy: 861.9,
-        sell: 861.9,
+        sell: 864.2,
         status: "verified",
       },
     ]);
-    expect(global.fetch).toHaveBeenCalledWith(
-      "https://www.binance.com/bapi/c2c/v1/public/c2c/agent/ad-list?fiat=VES&asset=USDT&tradeType=BUY&limit=10",
-      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+    expect(global.fetch).toHaveBeenNthCalledWith(
+      1,
+      "https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          fiat: "VES",
+          page: 1,
+          rows: 10,
+          tradeType: "BUY",
+          asset: "USDT",
+          publisherType: "merchant",
+          payTypes: ["PagoMovil"],
+        }),
+        signal: expect.any(AbortSignal),
+      }),
+    );
+    expect(global.fetch).toHaveBeenNthCalledWith(
+      2,
+      "https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          fiat: "VES",
+          page: 1,
+          rows: 10,
+          tradeType: "SELL",
+          asset: "USDT",
+          publisherType: "merchant",
+          payTypes: ["PagoMovil"],
+        }),
+        signal: expect.any(AbortSignal),
+      }),
     );
   });
 
   test.each([
-    ["an empty offer list", []],
-    ["only malformed offers", [{ price: "invalid" }, { price: 0 }]],
-  ])("fails closed when Binance P2P returns %s", async (_label, items) => {
+    ["a non-success response code", { code: "-1000", data: [] }],
+    ["an empty offer list", { code: "000000", data: [] }],
+    [
+      "only malformed offers",
+      {
+        code: "000000",
+        data: [{ adv: { price: "invalid" } }, { adv: { price: 0 } }],
+      },
+    ],
+  ])("fails closed when Binance P2P returns %s", async (_label, response) => {
     global.fetch = jest.fn(async () => ({
       ok: true,
       status: 200,
-      json: async () => ({ success: true, data: { items } }),
+      json: async () => response,
     })) as unknown as typeof fetch;
 
     await expect(new BinanceP2pProvider().collect()).rejects.toThrow(

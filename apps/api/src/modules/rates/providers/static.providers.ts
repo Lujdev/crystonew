@@ -5,7 +5,7 @@ const now = (): Date => new Date();
 const BCV_URL = process.env.BCV_URL ?? "https://www.bcv.org.ve/";
 const BINANCE_P2P_URL =
   process.env.BINANCE_P2P_URL ??
-  "https://www.binance.com/bapi/c2c/v1/public/c2c/agent/ad-list";
+  "https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search";
 const ITALCAMBIO_URL =
   process.env.ITALCAMBIO_URL ?? "https://www.italcambio.com/divisas.php";
 const SOURCE_TIMEOUT_MS = 10_000;
@@ -130,12 +130,20 @@ async function fetchText(url: string, source: string): Promise<string> {
   }
 }
 
-async function fetchJson(url: string, source: string): Promise<unknown> {
+async function fetchJson(
+  url: string,
+  source: string,
+  init: Omit<RequestInit, "signal"> = {},
+): Promise<unknown> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), SOURCE_TIMEOUT_MS);
   try {
     const response = await fetch(url, {
-      headers: { Accept: "application/json" },
+      ...init,
+      headers: {
+        Accept: "application/json",
+        ...(init.headers as Record<string, string> | undefined),
+      },
       signal: controller.signal,
     });
     if (!response.ok) {
@@ -169,43 +177,49 @@ function parseExternalRate(value: unknown, source: string): number {
   return parsed;
 }
 
-interface BinanceP2pOffer {
-  price?: unknown;
-}
-
-interface BinanceP2pData {
-  items?: BinanceP2pOffer[];
+interface BinanceP2pAd {
+  adv?: {
+    price?: unknown;
+  };
 }
 
 interface BinanceP2pResponse {
-  data?: BinanceP2pData;
-  success?: boolean;
+  code?: string;
+  data?: BinanceP2pAd[];
 }
 
-async function fetchBinanceBuyPrice(): Promise<number> {
-  const url = new URL(BINANCE_P2P_URL);
-  url.searchParams.set("fiat", "VES");
-  url.searchParams.set("asset", "USDT");
-  url.searchParams.set("tradeType", "BUY");
-  url.searchParams.set("limit", "10");
-  const payload = (await fetchJson(
-    url.toString(),
-    "Binance P2P",
-  )) as BinanceP2pResponse;
-  const offers = payload.success ? payload.data?.items : undefined;
-  if (!Array.isArray(offers) || offers.length === 0) {
-    throw new Error("Binance P2P response does not contain offers");
+async function fetchBinancePrice(tradeType: "BUY" | "SELL"): Promise<number> {
+  const payload = {
+    fiat: "VES",
+    page: 1,
+    rows: 10,
+    tradeType,
+    asset: "USDT",
+    publisherType: "merchant",
+    payTypes: ["PagoMovil"],
+  };
+  const response = (await fetchJson(BINANCE_P2P_URL, "Binance P2P", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })) as BinanceP2pResponse;
+  if (response.code !== "000000" || !Array.isArray(response.data)) {
+    throw new Error(
+      `Binance P2P response does not contain offers for ${tradeType}`,
+    );
   }
 
-  const prices = offers.flatMap((offer) => {
+  const prices = response.data.flatMap((ad) => {
     try {
-      return [parseExternalRate(offer.price, "Binance P2P")];
+      return [parseExternalRate(ad.adv?.price, "Binance P2P")];
     } catch {
       return [];
     }
   });
   if (prices.length === 0) {
-    throw new Error("Binance P2P response does not contain a valid offer price");
+    throw new Error(
+      `Binance P2P response does not contain a valid offer price for ${tradeType}`,
+    );
   }
   return Math.max(...prices);
 }
@@ -257,13 +271,16 @@ export class BcvProvider implements RateProvider {
 export class BinanceP2pProvider implements RateProvider {
   readonly code = "BINANCE_P2P";
   async collect(): Promise<ProviderQuote[]> {
-    const buy = await fetchBinanceBuyPrice();
+    const [buy, sell] = await Promise.all([
+      fetchBinancePrice("BUY"),
+      fetchBinancePrice("SELL"),
+    ]);
     return [
       {
         providerCode: this.code,
         pairCode: "USDT/VES",
         buy,
-        sell: buy,
+        sell,
         status: "verified",
         observedAt: now(),
       },
