@@ -497,41 +497,79 @@ button {
 
 .calculator-direction {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
   margin-top: 10px;
+  min-width: 0;
   border: 1px solid var(--calc-line);
   border-radius: 13px;
   padding: 4px;
   background: color-mix(in srgb, var(--calc-surface) 82%, transparent);
 }
 
-.calculator-direction button {
+.calculator-direction-currency {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+  padding: 7px 8px;
+}
+
+.calculator-direction-currency span {
+  color: var(--calc-muted);
+  font-size: 0.61rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.calculator-direction-currency strong {
   display: inline-flex;
-  min-height: 36px;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+  color: var(--calc-text);
+  font-size: 0.82rem;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
+.calculator-direction-currency strong svg {
+  flex: 0 0 auto;
+  color: var(--calc-blue);
+}
+
+.calculator-swap-button {
+  display: inline-flex;
+  width: 44px;
+  min-width: 44px;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
-  gap: 5px;
   border: 0;
-  border-radius: 9px;
-  background: transparent;
-  color: var(--calc-tab);
-  font-size: 0.67rem;
-  font-weight: 900;
-  white-space: nowrap;
-}
-
-.calculator-direction button span {
-  color: var(--calc-muted);
-}
-
-.calculator-direction button.active {
+  border-radius: 12px;
   background: var(--calc-surface-strong);
-  color: var(--calc-text);
+  color: var(--calc-blue);
   box-shadow: 0 4px 15px rgb(0 0 0 / 20%);
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
 }
 
-.calculator-direction button:focus-visible,
+.calculator-swap-button:hover {
+  background: color-mix(
+    in srgb,
+    var(--calc-blue) 20%,
+    var(--calc-surface-strong)
+  );
+}
+
+.calculator-swap-button:active {
+  transform: scale(0.96);
+}
+
+.calculator-swap-button:focus-visible,
 .bank-picker-trigger:focus-visible,
 .bank-search input:focus-visible,
 .bank-options li:focus-visible {
@@ -2557,6 +2595,14 @@ button.bank-picker-trigger.open > svg {
 
   .calculator-quotes {
     grid-template-columns: 1fr;
+  }
+
+  .calculator-direction {
+    gap: 4px;
+  }
+
+  .calculator-direction-currency {
+    padding-inline: 5px;
   }
 
   .primary-result-values {

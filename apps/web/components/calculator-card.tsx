@@ -40,7 +40,7 @@ const displayRate = (rate?: Rate) => (rate ? money(rate.buy) : "No disponible");
 const currencyMeta: Record<Currency, CurrencyMeta> = {
   USD: { Icon: DollarSign, provider: "BCV" },
   EUR: { Icon: Euro, provider: "BCV" },
-  USDT: { Icon: Bitcoin, provider: "P2P" },
+  USDT: { Icon: Bitcoin, provider: "Binance" },
 };
 
 export function CalculatorCard({ compact = false }: { compact?: boolean }) {
@@ -88,7 +88,7 @@ export function CalculatorCard({ compact = false }: { compact?: boolean }) {
           <div className="calculator-title"><span className="calculator-icon"><Calculator size={18} /></span><h2 id="calculator-title">Calculadora</h2></div>
           <div className="calculator-sources">
             <span><Landmark size={12} /> BCV {displayRate(usd)}</span>
-            <span><Bitcoin size={12} /> P2P {displayRate(usdt)}</span>
+            <span><Bitcoin size={12} /> Binance {displayRate(usdt)}</span>
             <span><Euro size={12} /> EUR {displayRate(eur)}</span>
           </div>
         </div>
@@ -101,12 +101,22 @@ export function CalculatorCard({ compact = false }: { compact?: boolean }) {
           })}
         </div>
         <div className="calculator-direction" role="group" aria-label="Dirección de conversión">
-          <button className={direction === "to-ves" ? "active" : ""} type="button" aria-pressed={direction === "to-ves"} onClick={() => setDirection("to-ves")}>
-            <ArrowLeftRight size={14} /> {currency} <span>→</span> Bs.
+          <div className="calculator-direction-currency">
+            <span>Desde</span>
+            <strong><InputIcon size={16} /> {inputCurrency}</strong>
+          </div>
+          <button
+            className="calculator-swap-button"
+            type="button"
+            aria-label={`Cambiar de ${inputCurrency} a ${outputCurrency}`}
+            onClick={() => setDirection((current) => current === "to-ves" ? "from-ves" : "to-ves")}
+          >
+            <ArrowLeftRight size={20} aria-hidden="true" />
           </button>
-          <button className={direction === "from-ves" ? "active" : ""} type="button" aria-pressed={direction === "from-ves"} onClick={() => setDirection("from-ves")}>
-            <ArrowLeftRight size={14} /> Bs. <span>→</span> {currency}
-          </button>
+          <div className="calculator-direction-currency">
+            <span>Hacia</span>
+            <strong><OutputIcon size={16} /> {outputCurrency}</strong>
+          </div>
         </div>
         <div className="calculator-label-row"><label htmlFor="calculator-amount">Monto en {inputCurrency}</label><span>{currencyMeta[currency].provider} · {currency}/VES</span></div>
         <div className="calculator-input">

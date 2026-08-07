@@ -20,7 +20,7 @@ describe("rate providers", () => {
           status: 200,
           json: async () => ({
             success: true,
-            data: { price: url.includes("BUY") ? "856.000" : "860.000" },
+            data: { items: [{ price: "856.000" }, { price: "861.900" }] },
           }),
         };
       }
@@ -69,7 +69,7 @@ describe("rate providers", () => {
         return {
           ok: true,
           status: 200,
-          json: async () => ({ success: true, data: { price: 856 } }),
+          json: async () => ({ success: true, data: { items: [{ price: 856 }] } }),
         };
       }
       return {
@@ -111,13 +111,20 @@ describe("rate providers", () => {
     );
   });
 
-  test("uses Binance P2P buy and sell quote prices", async () => {
+  test("uses the highest Binance P2P BUY offer from the first ten listings", async () => {
     global.fetch = jest.fn(async (input) => ({
       ok: true,
       status: 200,
       json: async () => ({
         success: true,
-        data: { price: String(String(input).includes("BUY") ? 856 : 860) },
+        data: {
+          items: [
+            { price: "856" },
+            { price: "861.9" },
+            { price: "invalid" },
+            { price: "0" },
+          ],
+        },
       }),
     })) as unknown as typeof fetch;
 
@@ -127,18 +134,29 @@ describe("rate providers", () => {
       {
         providerCode: "BINANCE_P2P",
         pairCode: "USDT/VES",
-        buy: 856,
-        sell: 860,
+        buy: 861.9,
+        sell: 861.9,
         status: "verified",
       },
     ]);
     expect(global.fetch).toHaveBeenCalledWith(
-      "https://www.binance.com/bapi/c2c/v1/public/c2c/agent/quote-price?fiat=VES&asset=USDT&tradeType=BUY",
+      "https://www.binance.com/bapi/c2c/v1/public/c2c/agent/ad-list?fiat=VES&asset=USDT&tradeType=BUY&limit=10",
       expect.objectContaining({ signal: expect.any(AbortSignal) }),
     );
-    expect(global.fetch).toHaveBeenCalledWith(
-      "https://www.binance.com/bapi/c2c/v1/public/c2c/agent/quote-price?fiat=VES&asset=USDT&tradeType=SELL",
-      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+  });
+
+  test.each([
+    ["an empty offer list", []],
+    ["only malformed offers", [{ price: "invalid" }, { price: 0 }]],
+  ])("fails closed when Binance P2P returns %s", async (_label, items) => {
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ success: true, data: { items } }),
+    })) as unknown as typeof fetch;
+
+    await expect(new BinanceP2pProvider().collect()).rejects.toThrow(
+      "Binance P2P response does not contain",
     );
   });
 

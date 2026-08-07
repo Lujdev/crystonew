@@ -5,7 +5,7 @@ const now = (): Date => new Date();
 const BCV_URL = process.env.BCV_URL ?? "https://www.bcv.org.ve/";
 const BINANCE_P2P_URL =
   process.env.BINANCE_P2P_URL ??
-  "https://www.binance.com/bapi/c2c/v1/public/c2c/agent/quote-price";
+  "https://www.binance.com/bapi/c2c/v1/public/c2c/agent/ad-list";
 const ITALCAMBIO_URL =
   process.env.ITALCAMBIO_URL ?? "https://www.italcambio.com/divisas.php";
 const SOURCE_TIMEOUT_MS = 10_000;
@@ -169,19 +169,45 @@ function parseExternalRate(value: unknown, source: string): number {
   return parsed;
 }
 
-async function fetchBinancePrice(tradeType: "BUY" | "SELL"): Promise<number> {
+interface BinanceP2pOffer {
+  price?: unknown;
+}
+
+interface BinanceP2pData {
+  items?: BinanceP2pOffer[];
+}
+
+interface BinanceP2pResponse {
+  data?: BinanceP2pData;
+  success?: boolean;
+}
+
+async function fetchBinanceBuyPrice(): Promise<number> {
   const url = new URL(BINANCE_P2P_URL);
   url.searchParams.set("fiat", "VES");
   url.searchParams.set("asset", "USDT");
-  url.searchParams.set("tradeType", tradeType);
-  const payload = (await fetchJson(url.toString(), "Binance P2P")) as {
-    data?: { price?: number | string };
-    success?: boolean;
-  };
-  if (!payload.success || payload.data?.price === undefined) {
-    throw new Error("Binance P2P response does not contain a price");
+  url.searchParams.set("tradeType", "BUY");
+  url.searchParams.set("limit", "10");
+  const payload = (await fetchJson(
+    url.toString(),
+    "Binance P2P",
+  )) as BinanceP2pResponse;
+  const offers = payload.success ? payload.data?.items : undefined;
+  if (!Array.isArray(offers) || offers.length === 0) {
+    throw new Error("Binance P2P response does not contain offers");
   }
-  return parseExternalRate(payload.data.price, "Binance P2P");
+
+  const prices = offers.flatMap((offer) => {
+    try {
+      return [parseExternalRate(offer.price, "Binance P2P")];
+    } catch {
+      return [];
+    }
+  });
+  if (prices.length === 0) {
+    throw new Error("Binance P2P response does not contain a valid offer price");
+  }
+  return Math.max(...prices);
 }
 
 function extractItalcambioRates(html: string): { buy: number; sell: number } {
@@ -231,16 +257,13 @@ export class BcvProvider implements RateProvider {
 export class BinanceP2pProvider implements RateProvider {
   readonly code = "BINANCE_P2P";
   async collect(): Promise<ProviderQuote[]> {
-    const [buy, sell] = await Promise.all([
-      fetchBinancePrice("BUY"),
-      fetchBinancePrice("SELL"),
-    ]);
+    const buy = await fetchBinanceBuyPrice();
     return [
       {
         providerCode: this.code,
         pairCode: "USDT/VES",
         buy,
-        sell,
+        sell: buy,
         status: "verified",
         observedAt: now(),
       },

@@ -26,7 +26,7 @@ export function RateDashboard() {
       <div style={{ marginTop: 16 }}><CalculatorCard /></div>
       <section className="metric-grid" aria-label="Resumen de tasas">
         <article className="card metric-card"><div className="metric-label"><span>BCV · USD</span><span>USD/VES</span></div><div className="metric-value">{usd ? `Bs. ${money(usd.buy)}` : "No disponible"}</div><div className="metric-foot"><CheckCircle2 size={14} /> {usd ? "Verificada" : "Sin datos"}</div></article>
-        <article className="card metric-card coral"><div className="metric-label"><span>Mercado P2P · USDT</span><span>USDT/VES</span></div><div className="metric-value">{usdt ? `Bs. ${money(usdt.buy)}` : "No disponible"}</div><div className="metric-foot" style={{ color: "var(--coral)" }}>{spread === null ? "Sin datos" : `+${spread.toFixed(2)}% sobre BCV`}</div></article>
+        <article className="card metric-card coral"><div className="metric-label"><span>Binance · USDT</span><span>USDT/VES</span></div><div className="metric-value">{usdt ? `Bs. ${money(usdt.buy)}` : "No disponible"}</div><div className="metric-foot" style={{ color: "var(--coral)" }}>{spread === null ? "Sin datos" : `+${spread.toFixed(2)}% sobre BCV`}</div></article>
         <article className="card metric-card"><div className="metric-label"><span>Lecturas activas</span><span>Fuentes</span></div><div className="metric-value">{rates.length}</div><div className="metric-foot"><RefreshCw size={14} /> Histórico guardado</div></article>
       </section>
       <section className="panel dashboard-card source-focus">
