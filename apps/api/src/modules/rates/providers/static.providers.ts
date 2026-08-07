@@ -1,3 +1,4 @@
+import * as https from "node:https";
 import type { ProviderQuote, RateProvider } from "../../../common/ports";
 
 const now = (): Date => new Date();
@@ -8,6 +9,8 @@ const BINANCE_P2P_URL =
 const ITALCAMBIO_URL =
   process.env.ITALCAMBIO_URL ?? "https://www.italcambio.com/divisas.php";
 const SOURCE_TIMEOUT_MS = 10_000;
+const BCV_TLS_REJECT_UNAUTHORIZED =
+  process.env.BCV_TLS_REJECT_UNAUTHORIZED !== "false";
 
 function parseBcvNumber(value: string): number {
   const normalized = value.replace(/\s/g, "");
@@ -34,6 +37,17 @@ function extractBcvRate(html: string, currencyId: "dolar" | "euro"): number {
 }
 
 async function fetchBcvRates(): Promise<{ usd: number; eur: number }> {
+  const html = await fetchBcvHtml();
+  return {
+    usd: extractBcvRate(html, "dolar"),
+    eur: extractBcvRate(html, "euro"),
+  };
+}
+
+async function fetchBcvHtml(): Promise<string> {
+  if (!BCV_TLS_REJECT_UNAUTHORIZED) {
+    return fetchBcvHtmlWithRelaxedTls();
+  }
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), SOURCE_TIMEOUT_MS);
   try {
@@ -44,11 +58,7 @@ async function fetchBcvRates(): Promise<{ usd: number; eur: number }> {
     if (!response.ok) {
       throw new Error(`BCV request failed with HTTP ${response.status}`);
     }
-    const html = await response.text();
-    return {
-      usd: extractBcvRate(html, "dolar"),
-      eur: extractBcvRate(html, "euro"),
-    };
+    return await response.text();
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
       throw new Error(`BCV request timed out after ${SOURCE_TIMEOUT_MS}ms`);
@@ -57,6 +67,43 @@ async function fetchBcvRates(): Promise<{ usd: number; eur: number }> {
   } finally {
     clearTimeout(timeout);
   }
+}
+
+function fetchBcvHtmlWithRelaxedTls(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const request = https.get(
+      BCV_URL,
+      {
+        headers: { Accept: "text/html", "Accept-Encoding": "identity" },
+        rejectUnauthorized: false,
+      },
+      (response) => {
+        if (!response.statusCode || response.statusCode >= 400) {
+          response.resume();
+          reject(
+            new Error(
+              `BCV request failed with HTTP ${response.statusCode ?? "unknown"}`,
+            ),
+          );
+          return;
+        }
+        const chunks: Buffer[] = [];
+        response.on("data", (chunk: Buffer | string) => {
+          chunks.push(Buffer.from(chunk));
+        });
+        response.on("end", () => {
+          resolve(Buffer.concat(chunks).toString("utf8"));
+        });
+        response.on("error", reject);
+      },
+    );
+    request.setTimeout(SOURCE_TIMEOUT_MS, () => {
+      request.destroy(
+        new Error(`BCV request timed out after ${SOURCE_TIMEOUT_MS}ms`),
+      );
+    });
+    request.on("error", reject);
+  });
 }
 
 async function fetchText(url: string, source: string): Promise<string> {

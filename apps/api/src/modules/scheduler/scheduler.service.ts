@@ -9,6 +9,14 @@ import {
 // biome-ignore lint/style/useImportType: runtime token required by NestJS DI
 import { RatesService } from "../rates/rates.service";
 
+function describeSyncError(error: unknown): string {
+  if (!(error instanceof Error)) return String(error);
+  const cause = error.cause;
+  return cause instanceof Error
+    ? `${error.message}: ${cause.message}`
+    : error.message;
+}
+
 const DEFAULT_BCV_INTERVAL_MINUTES = 6 * 60;
 const DEFAULT_MARKET_INTERVAL_MINUTES = 60;
 
@@ -56,9 +64,7 @@ export class SchedulerService implements OnModuleInit {
       try {
         await this.ratesService.sync(providers);
       } catch (error) {
-        this.logger.error(
-          `${label} sync failed: ${error instanceof Error ? error.message : String(error)}`,
-        );
+        this.logger.error(`${label} sync failed: ${describeSyncError(error)}`);
       }
     });
     this.syncQueue = nextSync;

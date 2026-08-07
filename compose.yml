@@ -8,6 +8,7 @@ services:
       API_PORT: 3001
       DATABASE_PATH: /app/data/crystodolar.sqlite
       BCV_URL: ${BCV_URL:-https://www.bcv.org.ve/}
+      BCV_TLS_REJECT_UNAUTHORIZED: ${BCV_TLS_REJECT_UNAUTHORIZED:-false}
       BINANCE_P2P_URL: ${BINANCE_P2P_URL:-https://www.binance.com/bapi/c2c/v1/public/c2c/agent/quote-price}
       ITALCAMBIO_URL: ${ITALCAMBIO_URL:-https://www.italcambio.com/divisas.php}
       BCV_SYNC_INTERVAL_MINUTES: ${BCV_SYNC_INTERVAL_MINUTES:-360}

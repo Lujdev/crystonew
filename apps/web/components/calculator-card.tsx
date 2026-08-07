@@ -33,13 +33,9 @@ type CurrencyMeta = {
 };
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
-const FALLBACK_UPDATED_AT = "2026-08-07T00:00:00-04:00";
-const FALLBACK_USD: Rate = { provider: "BCV", pair: "USD/VES", buy: 756.7083, sell: 756.7083, status: "verified", updatedAt: FALLBACK_UPDATED_AT };
-const FALLBACK_USDT: Rate = { provider: "BINANCE_P2P", pair: "USDT/VES", buy: 845.99, sell: 850.25, status: "verified", updatedAt: FALLBACK_UPDATED_AT };
-const FALLBACK_EUR: Rate = { provider: "BCV", pair: "EUR/VES", buy: 846.07, sell: 846.07, status: "verified", updatedAt: FALLBACK_UPDATED_AT };
-const fallback: Rate[] = [FALLBACK_USD, FALLBACK_USDT, FALLBACK_EUR];
 
 const money = (value: number) => value.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const displayRate = (rate?: Rate) => (rate ? money(rate.buy) : "No disponible");
 
 const currencyMeta: Record<Currency, CurrencyMeta> = {
   USD: { Icon: DollarSign, provider: "BCV" },
@@ -48,7 +44,7 @@ const currencyMeta: Record<Currency, CurrencyMeta> = {
 };
 
 export function CalculatorCard({ compact = false }: { compact?: boolean }) {
-  const [rates, setRates] = useState<Rate[]>(fallback);
+  const [rates, setRates] = useState<Rate[]>([]);
   const [currency, setCurrency] = useState<Currency>("USD");
   const [direction, setDirection] = useState<Direction>("to-ves");
   const [amount, setAmount] = useState("100");
@@ -64,10 +60,10 @@ export function CalculatorCard({ compact = false }: { compact?: boolean }) {
       .finally(() => setLoading(false));
   }, []);
 
-  const usd = useMemo(() => rates.find((rate) => rate.pair === "USD/VES" && rate.provider === "BCV") ?? rates.find((rate) => rate.pair === "USD/VES") ?? FALLBACK_USD, [rates]);
-  const usdt = useMemo(() => rates.find((rate) => rate.pair === "USDT/VES" && rate.provider === "BINANCE_P2P") ?? rates.find((rate) => rate.pair === "USDT/VES") ?? FALLBACK_USDT, [rates]);
-  const eur = useMemo(() => rates.find((rate) => rate.pair === "EUR/VES" && rate.provider === "BCV") ?? rates.find((rate) => rate.pair === "EUR/VES") ?? FALLBACK_EUR, [rates]);
-  const ratesByCurrency: Record<Currency, Rate> = { USD: usd, EUR: eur, USDT: usdt };
+  const usd = useMemo(() => rates.find((rate) => rate.pair === "USD/VES" && rate.provider === "BCV") ?? rates.find((rate) => rate.pair === "USD/VES"), [rates]);
+  const usdt = useMemo(() => rates.find((rate) => rate.pair === "USDT/VES" && rate.provider === "BINANCE_P2P") ?? rates.find((rate) => rate.pair === "USDT/VES"), [rates]);
+  const eur = useMemo(() => rates.find((rate) => rate.pair === "EUR/VES" && rate.provider === "BCV") ?? rates.find((rate) => rate.pair === "EUR/VES"), [rates]);
+  const ratesByCurrency: Record<Currency, Rate | undefined> = { USD: usd, EUR: eur, USDT: usdt };
   const selectedRate = ratesByCurrency[currency];
   const SelectedIcon = currencyMeta[currency].Icon;
   const inputCurrency = direction === "to-ves" ? currency : "VES";
@@ -76,8 +72,14 @@ export function CalculatorCard({ compact = false }: { compact?: boolean }) {
   const OutputIcon = direction === "to-ves" ? Landmark : SelectedIcon;
   const parsedAmount = Number(amount.replace(",", ".") || 0);
   const numericAmount = Number.isFinite(parsedAmount) ? parsedAmount : 0;
-  const convertedAmount = direction === "to-ves" ? numericAmount * selectedRate.buy : numericAmount / selectedRate.buy;
-  const updatedAt = new Date(selectedRate.updatedAt).toLocaleTimeString("es-VE", { hour: "2-digit", minute: "2-digit" });
+  const convertedAmount = selectedRate
+    ? direction === "to-ves"
+      ? numericAmount * selectedRate.buy
+      : numericAmount / selectedRate.buy
+    : 0;
+  const updatedAt = selectedRate
+    ? new Date(selectedRate.updatedAt).toLocaleTimeString("es-VE", { hour: "2-digit", minute: "2-digit" })
+    : "No disponible";
 
   return (
     <section className={`calculator-card ${compact ? "calculator-card-compact" : ""}`} aria-labelledby="calculator-title">
@@ -85,9 +87,9 @@ export function CalculatorCard({ compact = false }: { compact?: boolean }) {
         <div>
           <div className="calculator-title"><span className="calculator-icon"><Calculator size={18} /></span><h2 id="calculator-title">Calculadora</h2></div>
           <div className="calculator-sources">
-            <span><Landmark size={12} /> BCV {money(usd.buy)}</span>
-            <span><Bitcoin size={12} /> P2P {money(usdt.buy)}</span>
-            <span><Euro size={12} /> EUR {money(eur.buy)}</span>
+            <span><Landmark size={12} /> BCV {displayRate(usd)}</span>
+            <span><Bitcoin size={12} /> P2P {displayRate(usdt)}</span>
+            <span><Euro size={12} /> EUR {displayRate(eur)}</span>
           </div>
         </div>
       </header>
@@ -115,8 +117,8 @@ export function CalculatorCard({ compact = false }: { compact?: boolean }) {
         <div className="calculator-primary-result">
           <div className="primary-result-head"><span><InputIcon size={14} /> {inputCurrency} <ArrowLeftRight size={12} /> <OutputIcon size={14} /> {outputCurrency}</span><div className="primary-result-actions"><small>{currencyMeta[currency].provider}</small>{direction === "to-ves" && <button className="payment-trigger" type="button" onClick={() => setPaymentOpen(true)}><Smartphone size={13} /> Pago Móvil</button>}</div></div>
           <div className="primary-result-values">
-            <div><small>Tasa</small><strong>Bs. {money(selectedRate.buy)}</strong><em>/ {currency}</em></div>
-            <div className="primary-result-total"><small>Recibes en {outputCurrency} · {amount || "0"} {inputCurrency}</small><strong>{outputCurrency === "VES" ? `Bs. ${money(convertedAmount)}` : `${currency} ${money(convertedAmount)}`}</strong></div>
+            <div><small>Tasa</small><strong>{selectedRate ? `Bs. ${money(selectedRate.buy)}` : "No disponible"}</strong>{selectedRate && <em>/ {currency}</em>}</div>
+            <div className="primary-result-total"><small>Recibes en {outputCurrency} · {amount || "0"} {inputCurrency}</small><strong>{selectedRate ? outputCurrency === "VES" ? `Bs. ${money(convertedAmount)}` : `${currency} ${money(convertedAmount)}` : "No disponible"}</strong></div>
           </div>
         </div>
         <div className="calculator-result-label">{direction === "to-ves" ? "Compara las otras monedas" : "Equivalente con otras tasas"}</div>
@@ -125,19 +127,19 @@ export function CalculatorCard({ compact = false }: { compact?: boolean }) {
             const quoteMeta = currencyMeta[quoteCurrency];
             const QuoteIcon = quoteMeta.Icon;
             const quoteRate = ratesByCurrency[quoteCurrency];
-            const deltaPerUnit = quoteRate.buy - selectedRate.buy;
+            const deltaPerUnit = quoteRate && selectedRate ? quoteRate.buy - selectedRate.buy : 0;
             const deltaTotal = numericAmount * deltaPerUnit;
-            const quoteResult = direction === "to-ves" ? numericAmount * quoteRate.buy : numericAmount / quoteRate.buy;
+            const quoteResult = quoteRate ? direction === "to-ves" ? numericAmount * quoteRate.buy : numericAmount / quoteRate.buy : 0;
             const isGain = deltaPerUnit > 0.005;
             const isLoss = deltaPerUnit < -0.005;
             const DeltaIcon = isGain ? ArrowUpRight : ArrowDownRight;
             return (
               <article className={`calculator-quote quote-${quoteCurrency.toLowerCase()}`} key={quoteCurrency}>
                 <div className="quote-head"><span><QuoteIcon size={14} /> {quoteCurrency}</span><small>{quoteMeta.provider}</small></div>
-                <div className="quote-rate">Bs. {money(quoteRate.buy)} <small>/ {quoteCurrency}</small></div>
+                <div className="quote-rate">{quoteRate ? `Bs. ${money(quoteRate.buy)}` : "No disponible"} {quoteRate && <small>/ {quoteCurrency}</small>}</div>
                 <div className="quote-total-label">Recibes en {direction === "to-ves" ? "VES" : quoteCurrency}</div>
-                <div className="quote-total">{direction === "to-ves" ? `Bs. ${money(quoteResult)}` : `${quoteCurrency} ${money(quoteResult)}`}</div>
-                {direction === "to-ves" ? <>
+                <div className="quote-total">{quoteRate ? direction === "to-ves" ? `Bs. ${money(quoteResult)}` : `${quoteCurrency} ${money(quoteResult)}` : "No disponible"}</div>
+                {quoteRate && (direction === "to-ves" ? <>
                   <div className={`quote-delta ${isGain ? "gain" : isLoss ? "loss" : "selected-reference"}`}>
                     <DeltaIcon size={13} />
                     {`${isGain ? "Ganas" : "Pierdes"} ${isGain ? "+" : "−"}Bs. ${money(Math.abs(deltaPerUnit))} por unidad`}
@@ -146,14 +148,14 @@ export function CalculatorCard({ compact = false }: { compact?: boolean }) {
                 </> : <>
                   <div className="quote-delta selected-reference"><ArrowLeftRight size={13} /> 1 Bs. = {money(1 / quoteRate.buy)} {quoteCurrency}</div>
                   <small className="quote-delta-total">Referencia {quoteMeta.provider}</small>
-                </>}
+                </>)}
               </article>
             );
           })}
         </div>
-        <div className="calculator-foot"><span><CheckCircle2 size={14} /> Tasas referenciales</span><span><Clock3 size={14} /> {loading ? "Actualizando" : `Actualizado ${updatedAt}`}</span></div>
+        <div className="calculator-foot"><span><CheckCircle2 size={14} /> {selectedRate ? "Tasas referenciales" : "Tasas no disponibles"}</span><span><Clock3 size={14} /> {loading ? "Actualizando" : `Actualizado ${updatedAt}`}</span></div>
       </div>
-      <MobilePaymentModal open={paymentOpen} onClose={() => setPaymentOpen(false)} currency={currency} amount={amount} vesTotal={numericAmount * selectedRate.buy} />
+      <MobilePaymentModal open={paymentOpen} onClose={() => setPaymentOpen(false)} currency={currency} amount={amount} vesTotal={numericAmount * (selectedRate?.buy ?? 0)} />
     </section>
   );
 }
