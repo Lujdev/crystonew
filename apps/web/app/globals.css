@@ -544,6 +544,7 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  min-width: 0;
   margin-top: 19px;
   color: var(--calc-label);
   font-size: 0.7rem;
@@ -553,9 +554,12 @@ button {
 }
 
 .calculator-label-row span {
+  min-width: 0;
+  overflow-wrap: anywhere;
   color: var(--calc-secondary);
   font-size: 0.64rem;
   letter-spacing: 0;
+  text-align: right;
   text-transform: none;
 }
 
@@ -563,6 +567,7 @@ button {
 .calculator-result {
   display: flex;
   min-height: 65px;
+  min-width: 0;
   align-items: center;
   gap: 12px;
   margin-top: 9px;
@@ -586,15 +591,18 @@ button {
 }
 
 .calculator-input input {
-  width: 100%;
+  flex: 1 1 auto;
+  width: 0;
   min-width: 0;
+  overflow: hidden;
   border: 0;
   outline: 0;
   background: transparent;
   color: var(--calc-text);
   font-family: var(--font-display);
-  font-size: 1.7rem;
+  font-size: clamp(1.05rem, 5vw, 1.7rem);
   letter-spacing: -0.08em;
+  text-overflow: ellipsis;
 }
 
 .calculator-input strong,
@@ -762,12 +770,14 @@ button {
 }
 
 .primary-result-head {
+  flex-wrap: wrap;
   color: #8eacff;
   font-size: 0.7rem;
   font-weight: 900;
 }
 
 .primary-result-head span {
+  min-width: 0;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -814,6 +824,7 @@ button {
 
 .primary-result-values > div {
   display: flex;
+  min-width: 0;
   align-items: baseline;
   gap: 7px;
 }
@@ -828,21 +839,33 @@ button {
 }
 
 .primary-result-values strong {
+  min-width: 0;
+  max-width: 100%;
   font-family: var(--font-display);
-  font-size: 1.45rem;
+  font-size: clamp(1.1rem, 4.8vw, 1.45rem);
   letter-spacing: -0.07em;
-  white-space: nowrap;
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .primary-result-values > .primary-result-total {
+  min-width: 0;
   display: grid;
   justify-items: end;
   gap: 4px;
 }
 
+.primary-result-total small {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
 .primary-result-total strong {
   color: var(--calc-text);
-  font-size: 1.75rem;
+  font-size: clamp(1.1rem, 5.8vw, 1.75rem);
+  text-align: right;
 }
 
 .calculator-quotes {
@@ -907,12 +930,15 @@ button {
 }
 
 .quote-rate {
+  max-width: 100%;
   margin-top: 13px;
   color: var(--calc-text);
   font-family: var(--font-display);
   font-size: 1.15rem;
   letter-spacing: -0.06em;
-  white-space: nowrap;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .quote-rate small {
@@ -931,12 +957,15 @@ button {
 }
 
 .quote-total {
+  max-width: 100%;
   margin-top: 4px;
   color: var(--quote-accent);
   font-family: var(--font-display);
-  font-size: 1.38rem;
+  font-size: clamp(1rem, 5.4vw, 1.38rem);
   letter-spacing: -0.07em;
-  white-space: nowrap;
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .quote-delta {
@@ -2528,6 +2557,25 @@ button.bank-picker-trigger.open > svg {
 
   .calculator-quotes {
     grid-template-columns: 1fr;
+  }
+
+  .primary-result-values {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .primary-result-values > div:first-child {
+    max-width: none;
+  }
+
+  .primary-result-values > .primary-result-total {
+    justify-items: start;
+  }
+
+  .primary-result-total small,
+  .primary-result-total strong {
+    text-align: left;
   }
 
   .calculator-card-compact {
